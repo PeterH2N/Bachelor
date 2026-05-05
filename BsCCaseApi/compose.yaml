@@ -1,0 +1,7 @@
+﻿services:
+  bsccaseapi:
+    image: bsccaseapi
+    build:
+      context: .
+      dockerfile: BsCCaseApi/Dockerfile
+
