@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/BsCCaseApi.Library/migration.sql" value="9c824288-aac3-4ce9-a037-c7f7eac1c06b" />
-  </component>
-</project>
