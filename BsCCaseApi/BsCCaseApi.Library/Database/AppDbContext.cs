@@ -1,7 +1,7 @@
-using BsCCaseApi.Library.models;
+using BsCCaseApi.Library.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BsCCaseApi.Library.database;
+namespace BsCCaseApi.Library.Database;
 
 public class AppDbContext : DbContext
 {
@@ -9,10 +9,14 @@ public class AppDbContext : DbContext
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Car> Cars { get; set; }
     public DbSet<Employee> Employees { get; set; }
+    
+    private readonly string _connectionString = Environment.GetEnvironmentVariable("DB_URL") ?? string.Empty;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(@"Server=localhost\sqlserver,1433;Database=msdb;Trusted_Connection=True;User Id=sa;Password=Qyy49akg;");
+        optionsBuilder.UseSqlServer(
+            _connectionString
+            );
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

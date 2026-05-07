@@ -1,10 +1,37 @@
-using BsCCaseApi.Library.database;
+using BsCCaseApi.Library.Database;
+using BsCCaseApi.Library.Models;
 
-namespace BsCCaseApi.Library.services;
+namespace BsCCaseApi.Library.Services;
 
-public class CaseService(AppDbContext context) : ICaseService
+public class CaseService(AppDbContext dbContext) : ICaseService
 {
-    private readonly AppDbContext _context = context;
-    
-    
+    public async Task<Case> GetCaseById(int caseId)
+    {
+        var @case = await dbContext.Cases.FindAsync(caseId);
+        return @case ?? throw new Exception("Case not found");
+    }
+
+    public async Task CreateCase(Case @case)
+    {
+        await dbContext.Cases.AddAsync(@case);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteCase(int caseId)
+    {
+        var @case = await dbContext.Cases.FindAsync(caseId);
+        if (@case == null)
+        {
+            throw new Exception($"Case {caseId} not found");
+        }
+        dbContext.Cases.Remove(@case);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<Case> UpdateCase(Case @case)
+    {
+        var updated = dbContext.Cases.Update(@case);
+        await dbContext.SaveChangesAsync();
+        return updated.Entity;
+    }
 }

@@ -1,7 +1,8 @@
-
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using BsCCaseApi.Commons.enums;
 
-namespace BsCCaseApi.Library.models;
+namespace BsCCaseApi.Library.Models;
 
 public class Case
 {
@@ -10,15 +11,16 @@ public class Case
     public string CaseName { get; set; } = string.Empty;
     [MaxLength(1000)]
     public string CaseDescription { get; set; } = string.Empty;
-    public Customer Customer { get; set; }
+    public CaseType CaseType { get; set; }
+    public Customer? Customer { get; set; }
+    [JsonIgnore]
     public int CustomerId { get; set; }
-    
-    public Employee Employee { get; set; }
+    public Employee? Employee { get; set; }
+    [JsonIgnore]
     public int EmployeeId { get; set; }
-    
-    public int? CarId { get; set; }
     public Car? Car { get; set; }
-    
+    [JsonIgnore]
+    public int? CarId { get; set; }
     public DateTime DeliveryDate { get; set; }
     public DateTime CompleteDate { get; set; }
     public DateTime BeginTime { get; set; }

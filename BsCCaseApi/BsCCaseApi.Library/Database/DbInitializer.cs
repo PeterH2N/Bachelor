@@ -1,17 +1,13 @@
 using Bogus;
-using BsCCaseApi.Library.models;
+using BsCCaseApi.Library.Models;
 
-namespace BsCCaseApi.Library.database;
+namespace BsCCaseApi.Library.Database;
 
-public class DbInitializer
+public static class DbInitializer
 {
     public static async Task SeedData(AppDbContext context)
     {
         Randomizer.Seed = new Random(1337);
-        if (!await context.Database.EnsureCreatedAsync())
-        {
-            return;
-        }
 
         List<Customer>? dbCustomers = null;
         List<Employee>? dbEmployees = null;

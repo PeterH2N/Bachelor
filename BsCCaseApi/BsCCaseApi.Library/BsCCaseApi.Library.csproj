@@ -20,4 +20,8 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\BsCCaseApi.Commons\BsCCaseApi.Commons.csproj" />
+    </ItemGroup>
+
 </Project>
