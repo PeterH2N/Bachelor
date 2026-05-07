@@ -1,4 +1,4 @@
-using BsCCaseApi.Library.Models;
+using BsCCaseApi.Commons.Models;
 using BsCCaseApi.Library.Services;
 using Microsoft.AspNetCore.Mvc;
 

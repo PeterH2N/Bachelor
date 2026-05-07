@@ -1,11 +1,11 @@
-using BsCCaseApi.Library.Database;
 using BsCCaseApi.Library.Services;
+using BsCCaseApi.Library.Store;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Env.Load("../.env");
+Env.Load("../../.env");
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

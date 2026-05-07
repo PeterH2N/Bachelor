@@ -7,9 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.Library", "BsCCaseApi.Library\BsCCaseApi.Library.csproj", "{36B7BE20-BE8B-4F78-9458-E8D767E44836}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.DataAccess", "BsCCaseApi.DataAccess\BsCCaseApi.DataAccess.csproj", "{36B7BE20-BE8B-4F78-9458-E8D767E44836}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.Commons", "BsCCaseApi.Commons\BsCCaseApi.Commons.csproj", "{06BDE063-6D43-4391-AE77-0BA68B6AF0C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.Domain", "BsCCaseApi.Domain\BsCCaseApi.Domain.csproj", "{06BDE063-6D43-4391-AE77-0BA68B6AF0C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

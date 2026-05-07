@@ -1,21 +1,26 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using BsCCaseApi.Commons.enums;
-using BsCCaseApi.Commons.Models;
 
-namespace BsCCaseApi.Models.Request;
+namespace BsCCaseApi.Commons.Models;
 
-public class CaseDto
+public class Case
 {
     public int Id { get; set; }
+    [MaxLength(200)]
     public string CaseName { get; set; } = string.Empty;
+    [MaxLength(1000)]
     public string CaseDescription { get; set; } = string.Empty;
     public CaseType CaseType { get; set; }
+    public Customer? Customer { get; set; }
+    [JsonIgnore]
     public int CustomerId { get; set; }
-    
+    public Employee? Employee { get; set; }
+    [JsonIgnore]
     public int EmployeeId { get; set; }
-    
+    public Car? Car { get; set; }
+    [JsonIgnore]
     public int? CarId { get; set; }
-    
     public DateTime DeliveryDate { get; set; }
     public DateTime CompleteDate { get; set; }
     public DateTime BeginTime { get; set; }
@@ -26,25 +31,5 @@ public class CaseDto
     public bool Archived { get; set; }
     public DateTime? DeletedDate { get; set; }
     public DateTime ModifiedDate { get; set; }
-
-    public Case ToCase()
-    {
-        return new Case
-        {
-            Id = Id,
-            CaseName = CaseName,
-            CaseDescription = CaseDescription,
-            CustomerId = CustomerId,
-            EmployeeId = EmployeeId,
-            CarId = CarId,
-            DeliveryDate = DeliveryDate,
-            CompleteDate = CompleteDate,
-            BeginTime = BeginTime,
-            EndTime = EndTime,
-            Deleted = Deleted,
-            Archived = Archived,
-            DeletedDate = DeletedDate,
-            ModifiedDate = ModifiedDate
-        };
-    }
+    
 }

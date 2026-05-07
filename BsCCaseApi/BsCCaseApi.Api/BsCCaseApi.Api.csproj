@@ -24,8 +24,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BsCCaseApi.Commons\BsCCaseApi.Commons.csproj" />
-      <ProjectReference Include="..\BsCCaseApi.Library\BsCCaseApi.Library.csproj" />
+      <ProjectReference Include="..\BsCCaseApi.Domain\BsCCaseApi.Domain.csproj" />
+      <ProjectReference Include="..\BsCCaseApi.DataAccess\BsCCaseApi.DataAccess.csproj" />
     </ItemGroup>
 
 </Project>
