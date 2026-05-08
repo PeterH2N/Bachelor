@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BsCCaseApi.DataAccess" Version="1.0.0" />
+      <PackageReference Include="bsccaseapi.domain" Version="1.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BsCOpenSearchSync.DataAccess\BsCOpenSearchSync.DataAccess.csproj" />
+      <ProjectReference Include="..\BsCOpenSearchSync.Domain\BsCOpenSearchSync.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

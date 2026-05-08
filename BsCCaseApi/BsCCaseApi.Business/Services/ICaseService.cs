@@ -1,10 +1,10 @@
-using BsCCaseApi.Commons.Models;
+using BsCCaseApi.Domain.Models;
 
-namespace BsCCaseApi.Library.Services;
+namespace BsCCaseApi.Business.Services;
 
 public interface ICaseService
 {
-    public Task<Case> GetCaseById(int caseId);
+    public Task<Case> GetCaseById(Guid caseId);
     public Task CreateCase(Case @case);
     public Task DeleteCase(int caseId);
     public Task<Case> UpdateCase(Case @case);

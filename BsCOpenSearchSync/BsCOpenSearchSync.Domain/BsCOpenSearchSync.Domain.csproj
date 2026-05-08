@@ -4,6 +4,15 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <!-- NuGet package metadata -->
+        <PackageId>BsCOpenSearchSync.Domain</PackageId>
+        <Version>1.0.5</Version>
+        <Authors>PeterH2N</Authors>
+        <Company>SDU</Company>
+        <Description>Domain models and value objects for BsCCaseApi.</Description>
+        <PackageTags>domain;ddd;shared</PackageTags>
+        
     </PropertyGroup>
 
 </Project>

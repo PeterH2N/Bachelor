@@ -4,11 +4,13 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <RootNamespace>BsCCaseApi</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="bscopensearchsync.dataaccess" Version="1.0.5" />
         <PackageReference Include="DotNetEnv" Version="3.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
@@ -24,6 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BsCCaseApi.Business\BsCCaseApi.Business.csproj" />
       <ProjectReference Include="..\BsCCaseApi.Domain\BsCCaseApi.Domain.csproj" />
       <ProjectReference Include="..\BsCCaseApi.DataAccess\BsCCaseApi.DataAccess.csproj" />
     </ItemGroup>

@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.DataAccess", "Bs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.Domain", "BsCCaseApi.Domain\BsCCaseApi.Domain.csproj", "{06BDE063-6D43-4391-AE77-0BA68B6AF0C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCCaseApi.Business", "BsCCaseApi.Business\BsCCaseApi.Business.csproj", "{D2DB4AFB-1DDE-4911-BC00-E34A4C641FBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +31,9 @@ Global
 		{06BDE063-6D43-4391-AE77-0BA68B6AF0C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06BDE063-6D43-4391-AE77-0BA68B6AF0C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06BDE063-6D43-4391-AE77-0BA68B6AF0C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2DB4AFB-1DDE-4911-BC00-E34A4C641FBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2DB4AFB-1DDE-4911-BC00-E34A4C641FBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2DB4AFB-1DDE-4911-BC00-E34A4C641FBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2DB4AFB-1DDE-4911-BC00-E34A4C641FBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

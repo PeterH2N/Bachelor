@@ -1,10 +1,10 @@
 using System.Text.Json.Serialization;
 
-namespace BsCCaseApi.Commons.Models;
+namespace BsCCaseApi.Domain.Models;
 
 public class Customer
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public string Email { get; set; }
     public string Firstname { get; set; }
     public string Lastname { get; set; }

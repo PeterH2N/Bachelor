@@ -1,5 +1,7 @@
-using BsCCaseApi.Library.Services;
-using BsCCaseApi.Library.Store;
+using BsCCaseApi.Business.Services;
+using BsCCaseApi.DataAccess.Store;
+using BsCOpenSearchSync.DataAccess.Services;
+using BsCOpenSearchSync.DataAccess.Store;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 
@@ -15,10 +17,12 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddDbContext<EventDbContext>();
 builder.Services.AddScoped<ICaseService, CaseService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ISyncEventService, SyncEventService>();
 
 builder.Services.AddControllers();
 

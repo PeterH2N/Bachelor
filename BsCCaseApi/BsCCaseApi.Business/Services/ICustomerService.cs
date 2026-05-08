@@ -1,10 +1,10 @@
-using BsCCaseApi.Commons.Models;
+using BsCCaseApi.Domain.Models;
 
-namespace BsCCaseApi.Library.Services;
+namespace BsCCaseApi.Business.Services;
 
 public interface ICustomerService
 {
-    public Task<Customer> GetCustomerById(int customerId);
+    public Task<Customer> GetCustomerById(Guid customerId);
     public Task CreateCustomer(Customer customer);
     public Task<Customer> UpdateCustomer(Customer customer);
 }

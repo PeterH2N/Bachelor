@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using BsCCaseApi.Commons.enums;
-using BsCCaseApi.Commons.Models;
+using BsCCaseApi.Domain.enums;
+using BsCCaseApi.Domain.Models;
 
 namespace BsCCaseApi.Models.Request;
 
 public class CaseDto
 {
-    public int Id { get; set; }
     public string CaseName { get; set; } = string.Empty;
     public string CaseDescription { get; set; } = string.Empty;
     public CaseType CaseType { get; set; }
@@ -31,7 +30,6 @@ public class CaseDto
     {
         return new Case
         {
-            Id = Id,
             CaseName = CaseName,
             CaseDescription = CaseDescription,
             CustomerId = CustomerId,

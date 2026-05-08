@@ -1,5 +1,6 @@
-using BsCCaseApi.Commons.Models;
-using BsCCaseApi.Library.Services;
+using BsCCaseApi.Business.Services;
+using BsCCaseApi.Domain.Models;
+using BsCCaseApi.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BsCCaseApi.Controllers;
@@ -8,21 +9,27 @@ namespace BsCCaseApi.Controllers;
 [ApiController]
 public class CarController(ICarService carService)
 {
-    [HttpGet("{carId:int}")]
-    public Task<Car> Get(int carId)
+    [HttpGet]
+    public Task<List<Car>> GetAll()
+    {
+        return carService.GetAll();
+    }
+    
+    [HttpGet("{carId:guid}")]
+    public Task<Car> Get(Guid carId)
     {
         return carService.GetCarById(carId);
     }
 
     [HttpPut]
-    public Task Create([FromBody] Car car)
+    public Task Create([FromBody] CarDto car)
     {
-        return carService.CreateCar(car);
+        return carService.CreateCar(car.ToCar());
     }
 
     [HttpPatch]
-    public Task<Car> Update([FromBody] Car car)
+    public Task<Car> Update([FromBody] CarDto car)
     {
-        return carService.UpdateCar(car);
+        return carService.UpdateCar(car.ToCar());
     }
 }

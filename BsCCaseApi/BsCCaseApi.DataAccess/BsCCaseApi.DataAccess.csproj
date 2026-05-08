@@ -4,8 +4,21 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>BsCCaseApi.Library</RootNamespace>
+        <RootNamespace>BsCCaseApi.DataAccess</RootNamespace>
+
+        <!-- NuGet package metadata -->
+        <PackageId>BsCCaseApi.DataAccess</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>PeterH2N</Authors>
+        <Company>SDU</Company>
+        <Description>Database context for BsCCaseApi.</Description>
+        <PackageTags>domain;ddd;shared</PackageTags>
+
+        <!-- Generate package on build -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
+    
+    
 
     <ItemGroup>
       <PackageReference Include="Bogus" Version="35.6.5" />

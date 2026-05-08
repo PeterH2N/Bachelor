@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace BsCCaseApi.Commons.Models;
+namespace BsCCaseApi.Domain.Models;
 [Table("Cars")]
 public class Car
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public int CustomerId { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public Customer? Customer { get; set; }

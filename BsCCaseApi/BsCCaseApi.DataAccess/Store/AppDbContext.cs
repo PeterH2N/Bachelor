@@ -1,7 +1,7 @@
-using BsCCaseApi.Commons.Models;
+using BsCCaseApi.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BsCCaseApi.Library.Store;
+namespace BsCCaseApi.DataAccess.Store;
 
 public class AppDbContext : DbContext
 {

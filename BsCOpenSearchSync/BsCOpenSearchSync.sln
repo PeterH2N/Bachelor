@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCOpenSearchSync.DataAcces
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCOpenSearchSync.Domain", "BsCOpenSearchSync.Domain\BsCOpenSearchSync.Domain.csproj", "{58A87806-1A09-4AE7-B961-B2DE9A29DF41}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BsCOpenSearchSync.Business", "BsCOpenSearchSync.Business\BsCOpenSearchSync.Business.csproj", "{BD0E3236-33B6-4C91-95F5-58714A882A4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,5 +30,9 @@ Global
 		{081574E6-17B0-49D0-85DA-C9A166D80DAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{081574E6-17B0-49D0-85DA-C9A166D80DAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{081574E6-17B0-49D0-85DA-C9A166D80DAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD0E3236-33B6-4C91-95F5-58714A882A4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD0E3236-33B6-4C91-95F5-58714A882A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD0E3236-33B6-4C91-95F5-58714A882A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD0E3236-33B6-4C91-95F5-58714A882A4C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

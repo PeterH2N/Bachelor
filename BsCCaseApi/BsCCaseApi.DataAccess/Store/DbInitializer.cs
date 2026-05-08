@@ -1,7 +1,7 @@
 using Bogus;
-using BsCCaseApi.Commons.Models;
+using BsCCaseApi.Domain.Models;
 
-namespace BsCCaseApi.Library.Store;
+namespace BsCCaseApi.DataAccess.Store;
 
 public static class DbInitializer
 {

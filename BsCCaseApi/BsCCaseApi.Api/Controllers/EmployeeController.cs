@@ -1,5 +1,6 @@
-using BsCCaseApi.Commons.Models;
-using BsCCaseApi.Library.Services;
+using BsCCaseApi.Business.Services;
+using BsCCaseApi.Domain.Models;
+using BsCCaseApi.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BsCCaseApi.Controllers;
@@ -8,21 +9,21 @@ namespace BsCCaseApi.Controllers;
 [ApiController]
 public class EmployeeController(IEmployeeService employeeService)
 {
-    [HttpGet("{employeeId:int}")]
-    public Task<Employee> Get(int employeeId)
+    [HttpGet("{employeeId:guid}")]
+    public Task<Employee> Get(Guid employeeId)
     {
         return employeeService.GetEmployeeById(employeeId);
     }
 
     [HttpPut]
-    public Task Create([FromBody] Employee employee)
+    public Task Create([FromBody] EmployeeDto employee)
     {
-        return employeeService.CreateEmployee(employee);
+        return employeeService.CreateEmployee(employee.ToEmployee());
     }
 
     [HttpPatch]
-    public Task<Employee> Update([FromBody] Employee employee)
+    public Task<Employee> Update([FromBody] EmployeeDto employee)
     {
-        return employeeService.UpdateEmployee(employee);
+        return employeeService.UpdateEmployee(employee.ToEmployee());
     }
 }

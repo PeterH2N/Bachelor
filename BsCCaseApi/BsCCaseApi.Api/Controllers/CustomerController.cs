@@ -1,5 +1,6 @@
-using BsCCaseApi.Commons.Models;
-using BsCCaseApi.Library.Services;
+using BsCCaseApi.Business.Services;
+using BsCCaseApi.Domain.Models;
+using BsCCaseApi.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BsCCaseApi.Controllers;
@@ -8,21 +9,21 @@ namespace BsCCaseApi.Controllers;
 [ApiController]
 public class CustomerController(ICustomerService customerService)
 {
-    [HttpGet("{customerId:int}")]
-    public Task<Customer> Get(int customerId)
+    [HttpGet("{customerId:guid}")]
+    public Task<Customer> Get(Guid customerId)
     {
         return customerService.GetCustomerById(customerId);
     }
 
     [HttpPut]
-    public Task Create([FromBody] Customer customer)
+    public Task Create([FromBody] CustomerDto customer)
     {
-        return customerService.CreateCustomer(customer);
+        return customerService.CreateCustomer(customer.ToCustomer());
     }
 
     [HttpPatch]
-    public Task<Customer> Update([FromBody] Customer customer)
+    public Task<Customer> Update([FromBody] CustomerDto customer)
     {
-        return customerService.UpdateCustomer(customer);
+        return customerService.UpdateCustomer(customer.ToCustomer());
     }
 }

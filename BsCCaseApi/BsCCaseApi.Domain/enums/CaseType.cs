@@ -1,4 +1,4 @@
-namespace BsCCaseApi.Commons.enums;
+namespace BsCCaseApi.Domain.enums;
 
 public enum CaseType
 {

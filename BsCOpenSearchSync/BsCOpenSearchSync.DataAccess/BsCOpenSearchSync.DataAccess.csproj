@@ -4,17 +4,36 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>BsCOpenSearchSync.Library</RootNamespace>
+        <RootNamespace>BsCOpenSearchSync.DataAccess</RootNamespace>
+
+        <!-- NuGet package metadata -->
+        <PackageId>BsCOpenSearchSync.DataAccess</PackageId>
+        <Version>1.0.5</Version>
+        <Authors>PeterH2N</Authors>
+        <Company>SDU</Company>
+        <Description>Database context for BsCCaseApi.</Description>
+        <PackageTags>domain;ddd;shared</PackageTags>
+
+        <!-- Generate package on build -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="BsCCaseApi.Domain" Version="1.0.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.7" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\BsCOpenSearchSync.Domain\BsCOpenSearchSync.Domain.csproj" />
-        <ProjectReference Include="..\..\BsCCaseApi\BsCCaseApi.Domain\BsCCaseApi.Domain.csproj" />
     </ItemGroup>
 
 </Project>

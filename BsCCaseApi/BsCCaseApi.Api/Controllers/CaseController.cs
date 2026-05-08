@@ -1,6 +1,5 @@
-using BsCCaseApi.Commons.Models;
-using BsCCaseApi.Library.Services;
-using BsCCaseApi.Models;
+using BsCCaseApi.Business.Services;
+using BsCCaseApi.Domain.Models;
 using BsCCaseApi.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,8 +11,8 @@ namespace BsCCaseApi.Controllers;
 public class CaseController(ICaseService caseService)
 {
 
-    [HttpGet("{caseId:int}")]
-    public Task<Case> Get(int caseId)
+    [HttpGet("{caseId:guid}")]
+    public Task<Case> Get(Guid caseId)
     {
         return caseService.GetCaseById(caseId);
     }

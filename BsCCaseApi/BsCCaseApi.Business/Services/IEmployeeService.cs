@@ -1,10 +1,10 @@
-using BsCCaseApi.Commons.Models;
+using BsCCaseApi.Domain.Models;
 
-namespace BsCCaseApi.Library.Services;
+namespace BsCCaseApi.Business.Services;
 
 public interface IEmployeeService
 {
-    public Task<Employee> GetEmployeeById(int employeeId);
+    public Task<Employee> GetEmployeeById(Guid employeeId);
     public Task CreateEmployee(Employee employee);
     public Task<Employee> UpdateEmployee(Employee employee);
 }
