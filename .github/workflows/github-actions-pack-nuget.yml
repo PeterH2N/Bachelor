@@ -1,7 +1,6 @@
 name: Pack & Publish to GitHub Packages
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*"
