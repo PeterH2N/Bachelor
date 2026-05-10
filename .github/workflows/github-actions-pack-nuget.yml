@@ -11,7 +11,7 @@ jobs:
   pack:
     runs-on: ubuntu-latest
 
-    steps:    
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -20,8 +20,11 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "8.0.x"
 
+      # ------------------------------
+      # Authenticate to GitHub Packages
+      # ------------------------------
       - name: Add GitHub Packages NuGet source
         run: |
           dotnet nuget add source \
@@ -31,6 +34,9 @@ jobs:
             --name github \
             "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
+      # ------------------------------
+      # Extract version from tag
+      # ------------------------------
       - name: Extract version from tag
         id: version
         run: |
@@ -39,20 +45,29 @@ jobs:
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $CLEAN_VERSION"
 
+      # ------------------------------
+      # Run your pack script
+      # ------------------------------
       - name: Make pack script executable
         run: chmod +x ./pack-nuget.sh
 
-      - name: Run pack script
+      - name: Pack all projects
         run: ./pack-nuget.sh "${{ steps.version.outputs.version }}"
 
+      # ------------------------------
+      # Upload artifacts for debugging
+      # ------------------------------
       - name: Upload NuGet artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nuget-packages
           path: nuget/*.nupkg
 
+      # ------------------------------
+      # Publish to GitHub Packages
+      # ------------------------------
       - name: Publish to GitHub Packages
         run: |
           dotnet nuget push "nuget/*.nupkg" \
-            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --api-key ${{ secrets.GH_PACKAGES_PAT }} \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
