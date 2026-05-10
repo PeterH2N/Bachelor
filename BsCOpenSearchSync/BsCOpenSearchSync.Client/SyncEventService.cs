@@ -1,7 +1,7 @@
 using BsCOpenSearchSync.DataAccess.Store;
 using BsCOpenSearchSync.Domain.Models.Events;
 
-namespace BsCOpenSearchSync.DataAccess.Services;
+namespace BsCOpenSearchSync.Client;
 
 public class SyncEventService(EventDbContext dbContext) : ISyncEventService
 {

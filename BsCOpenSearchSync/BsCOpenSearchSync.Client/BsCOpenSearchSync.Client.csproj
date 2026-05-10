@@ -5,24 +5,30 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
-        <RootNamespace>BsCOpenSearchSync.Domain</RootNamespace>
+        <RootNamespace>BsCOpenSearchSync.Client</RootNamespace>
 
         <!-- NuGet package metadata -->
-        <PackageId>BsCOpenSearchSync.Domain</PackageId>
+        <PackageId>BsCOpenSearchSync.Client</PackageId>
         <Version>1.1.0</Version>
         <Authors>PeterH2N</Authors>
         <Company>SDU</Company>
-        <Description>Domain models and value objects for BsCCaseApi.</Description>
+        <Description>Sync service</Description>
         <PackageTags>domain;ddd;shared</PackageTags>
 
+        <!-- Generate package on build -->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        
+
         <!-- Github packages -->
         <PackageProjectUrl>https://github.com/PeterH2N/REPO</PackageProjectUrl>
         <RepositoryUrl>https://github.com/PeterH2N/Bachelor</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BsCOpenSearchSync.Business\BsCOpenSearchSync.Business.csproj" />
+      <ProjectReference Include="..\BsCOpenSearchSync.DataAccess\BsCOpenSearchSync.DataAccess.csproj" />
+      <ProjectReference Include="..\BsCOpenSearchSync.Domain\BsCOpenSearchSync.Domain.csproj" />
+    </ItemGroup>
 
 </Project>

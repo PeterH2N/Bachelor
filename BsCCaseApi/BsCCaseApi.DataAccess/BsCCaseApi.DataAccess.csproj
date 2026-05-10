@@ -5,10 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>BsCCaseApi.DataAccess</RootNamespace>
+        <IsPackable>true</IsPackable>
 
         <!-- NuGet package metadata -->
         <PackageId>BsCCaseApi.DataAccess</PackageId>
-        <Version>1.0.0</Version>
+        <Version>1.1.0</Version>
         <Authors>PeterH2N</Authors>
         <Company>SDU</Company>
         <Description>Database context for BsCCaseApi.</Description>
@@ -16,6 +17,12 @@
 
         <!-- Generate package on build -->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+        <!-- Github packages -->
+        <PackageProjectUrl>https://github.com/PeterH2N/REPO</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/PeterH2N/Bachelor</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
     </PropertyGroup>
     
     

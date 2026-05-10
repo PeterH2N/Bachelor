@@ -1,6 +1,6 @@
 using BsCOpenSearchSync.Domain.Models.Events;
 
-namespace BsCOpenSearchSync.DataAccess.Services;
+namespace BsCOpenSearchSync.Client;
 
 public interface ISyncEventService
 {
