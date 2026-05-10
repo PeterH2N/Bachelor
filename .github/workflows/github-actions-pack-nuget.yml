@@ -46,9 +46,6 @@ jobs:
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $CLEAN_VERSION"
 
-      - name: Build all projects
-        run: dotnet build --configuration Release
-
       # ------------------------------
       # Run your pack script
       # ------------------------------
