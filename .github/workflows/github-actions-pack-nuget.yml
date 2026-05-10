@@ -1,0 +1,49 @@
+name: Pack & Publish to GitHub Packages
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "*.*.*"
+      - "*.*.*-*"
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          RAW_TAG="${GITHUB_REF#refs/tags/}"
+          CLEAN_VERSION="${RAW_TAG#v}"
+          echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          echo "Using version: $CLEAN_VERSION"
+
+      - name: Make pack script executable
+        run: chmod +x ./pack-nuget.sh
+
+      - name: Run pack script
+        run: ./pack-nuget.sh "${{ steps.version.outputs.version }}"
+
+      - name: Upload NuGet artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: nuget/*.nupkg
+
+      - name: Publish to GitHub Packages
+        run: |
+          dotnet nuget push "nuget/*.nupkg" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
