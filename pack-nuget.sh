@@ -48,6 +48,7 @@ mkdir -p "$OUTPUT_DIR"
 
 for PROJ in $PACKABLE_PROJECTS; do
   echo "Packing $PROJ"
+  dotnet build $PROJ -c Release
   dotnet pack "$PROJ" -c Release -o "$OUTPUT_DIR" /p:Version="$VERSION"
 done
 
