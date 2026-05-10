@@ -25,18 +25,14 @@ jobs:
       # ------------------------------
       # Authenticate to GitHub Packages
       # ------------------------------
-
-      - name: Remove existing GitHub source if present
-        run: |
-          dotnet nuget remove source github || true
           
       - name: Add GitHub Packages NuGet source
         run: |
           dotnet nuget add source \
+            --store-password-in-clear-text \
             --username ${{ github.actor }} \
             --password ${{ secrets.GH_PACKAGES_PAT }} \
-            --store-password-in-clear-text \
-            --name github \
+            --name github-owner-123 \
             "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
       # ------------------------------
