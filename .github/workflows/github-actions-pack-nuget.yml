@@ -41,6 +41,12 @@ jobs:
           CLEAN_VERSION="${RAW_TAG#v}"
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $CLEAN_VERSION"
+          
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
 
       - name: Make pack script executable
         run: chmod +x ./pack-nuget.sh
@@ -50,12 +56,6 @@ jobs:
           GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }}
         run: |
           ./pack-nuget.sh "${{ steps.version.outputs.version }}"
-
-      - name: Checkout main branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
 
       - name: Configure Git for commit
         run: |
