@@ -1,4 +1,4 @@
-name: Pack & Publish to GitHub Packages
+name: Internal layered NuGet pipeline
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
       - "*.*.*"
       - "*.*.*-*"
 
+permissions:
+  contents: write
+
 jobs:
-  pack:
+  layered-pack-publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,24 +23,17 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: "10.0.x"
 
-      # ------------------------------
-      # Authenticate to GitHub Packages
-      # ------------------------------
-          
       - name: Add GitHub Packages NuGet source
         run: |
           dotnet nuget add source \
             --username ${{ github.actor }} \
             --password ${{ secrets.GH_PACKAGES_PAT }} \
             --store-password-in-clear-text \
-            --name mygithubfeed \
+            --name internal-gh-packages \
             "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
-      # ------------------------------
-      # Extract version from tag
-      # ------------------------------
       - name: Extract version from tag
         id: version
         run: |
@@ -46,29 +42,29 @@ jobs:
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $CLEAN_VERSION"
 
-      # ------------------------------
-      # Run your pack script
-      # ------------------------------
       - name: Make pack script executable
         run: chmod +x ./pack-nuget.sh
 
-      - name: Pack all projects
-        run: ./pack-nuget.sh "${{ steps.version.outputs.version }}"
+      - name: Layered build, pack, publish, and bump references
+        env:
+          GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }}
+        run: |
+          ./pack-nuget.sh "${{ steps.version.outputs.version }}"
 
-      # ------------------------------
-      # Upload artifacts for debugging
-      # ------------------------------
+      - name: Configure Git for commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Commit updated dependency versions
+        run: |
+          git status
+          git add .
+          git commit -m "Update internal package references to version ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+          git push origin main
+
       - name: Upload NuGet artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nuget-packages
           path: nuget/*.nupkg
-
-      # ------------------------------
-      # Publish to GitHub Packages
-      # ------------------------------
-      - name: Publish to GitHub Packages
-        run: |
-          dotnet nuget push "nuget/*.nupkg" \
-            --api-key ${{ secrets.GH_PACKAGES_PAT }} \
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
