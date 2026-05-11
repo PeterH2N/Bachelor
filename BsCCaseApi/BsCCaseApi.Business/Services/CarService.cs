@@ -1,6 +1,6 @@
 using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
-using BsCOpenSearchSync.DataAccess.Services;
+using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.Domain.Enums;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
