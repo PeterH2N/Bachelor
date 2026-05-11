@@ -58,13 +58,6 @@ jobs:
 
       - name: Commit updated dependency versions
         run: |
-          git status
           git add .
           git commit -m "Update internal package references to version ${{ steps.version.outputs.version }}" || echo "No changes to commit"
           git push origin main
-
-      - name: Upload NuGet artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuget-packages
-          path: nuget/*.nupkg
