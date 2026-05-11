@@ -37,16 +37,36 @@ build_pack_layer() {
   fi
 
   for proj in "${projects[@]}"; do
-    echo "Restoring $proj"
-    dotnet restore "$proj"
+    echo "Processing $proj"
 
-    echo "Building $proj"
+    #
+    # 1. Update or insert <Version> tag
+    #
+    if grep -q "<Version>" "$proj"; then
+      # Replace existing <Version>...</Version>
+      sed -i -E "s|<Version>[^<]+</Version>|<Version>${VERSION}</Version>|g" "$proj"
+    else
+      # Insert <Version> tag inside first <PropertyGroup>
+      sed -i -E "0,/<PropertyGroup>/ s|(<PropertyGroup.*>)|\1\n    <Version>${VERSION}</Version>|" "$proj"
+    fi
+
+    echo "Updated <Version> in $proj"
+
+    #
+    # 2. Restore, build, pack
+    #
+    dotnet restore "$proj"
     dotnet build "$proj" -c Release
 
-    echo "Packing $proj"
-    dotnet pack "$proj" -c Release --no-build -o "$NUGET_OUTPUT_DIR" /p:Version="$VERSION"
+    dotnet pack "$proj" \
+      -c Release \
+      --no-build \
+      -o "$NUGET_OUTPUT_DIR"
   done
 
+  #
+  # 3. Push all packages from this layer
+  #
   echo "Pushing packages for layer: $layer_name"
   dotnet nuget push "$NUGET_OUTPUT_DIR"/*.nupkg \
     --api-key "$API_KEY" \
