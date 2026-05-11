@@ -15,7 +15,6 @@
 
     <ItemGroup>
       <PackageReference Include="bscopensearchsync.client" Version="1.2.20" />
-      <PackageReference Include="bscopensearchsync.dataaccess" Version="1.2.20" />
     </ItemGroup>
 
 </Project>

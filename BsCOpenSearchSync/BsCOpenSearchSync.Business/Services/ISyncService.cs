@@ -1,4 +1,3 @@
-using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Domain.Models.Events;
 
 namespace BsCOpenSearchSync.Business.Services;

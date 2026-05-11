@@ -1,4 +1,3 @@
-using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Business.Services;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.AspNetCore.Mvc;
