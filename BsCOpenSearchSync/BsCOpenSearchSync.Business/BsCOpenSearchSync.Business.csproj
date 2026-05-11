@@ -9,8 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BsCCaseApi.DataAccess" Version="1.2.18" />
-      <PackageReference Include="BsCCaseapi.Domain" Version="1.2.18" />
+      <PackageReference Include="BsCCaseApi.DataAccess" Version="1.2.19" />
+      <PackageReference Include="BsCCaseapi.Domain" Version="1.2.19" />
     </ItemGroup>
 
     <ItemGroup>
