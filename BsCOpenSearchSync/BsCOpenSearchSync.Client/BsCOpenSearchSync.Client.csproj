@@ -9,7 +9,7 @@
 
         <!-- NuGet package metadata -->
         <PackageId>BsCOpenSearchSync.Client</PackageId>
-        <Version>1.2.19</Version>
+        <Version>1.2.20</Version>
         <Authors>PeterH2N</Authors>
         <Company>SDU</Company>
         <Description>Sync service</Description>
