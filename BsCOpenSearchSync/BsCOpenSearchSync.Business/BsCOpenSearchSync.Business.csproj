@@ -10,7 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="BsCCaseApi.DataAccess" Version="1.2.18" />
-      <PackageReference Include="bsccaseapi.domain" Version="1.2.10" />
+      <PackageReference Include="BsCCaseapi.Domain" Version="1.2.18" />
     </ItemGroup>
 
     <ItemGroup>

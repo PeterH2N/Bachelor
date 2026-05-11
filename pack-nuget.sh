@@ -91,19 +91,22 @@ update_references() {
 
     #
     # 1. Update inline Version="..."
+    #    Case-insensitive match using the 'I' flag
     #
     sed -i -E \
-      "s|(Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\")|\1${VERSION}\3|g" \
+      "s|(Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\")|\1${VERSION}\3|Ig" \
       "$proj"
 
     #
     # 2. Update <Version>...</Version> inside a PackageReference
+    #    Case-insensitive match using the 'I' flag
     #
     sed -i -E \
-      "/Include=\"[^\"]*${suffix}\"/,/<\/PackageReference>/ s|<Version>[0-9A-Za-z\.\-]+</Version>|<Version>${VERSION}</Version>|g" \
+      "/Include=\"[^\"]*${suffix}\"/I,/<\/PackageReference>/ s|<Version>[0-9A-Za-z\.\-]+</Version>|<Version>${VERSION}</Version>|Ig" \
       "$proj"
   done
 }
+
 
 
 

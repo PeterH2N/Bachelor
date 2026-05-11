@@ -1,8 +1,6 @@
-using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.DataAccess.Store;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
-using CaseDbContext = BsCCaseApi.DataAccess.Store.AppDbContext;
 
 namespace BsCOpenSearchSync.Business.Services;
 

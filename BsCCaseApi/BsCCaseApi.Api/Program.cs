@@ -1,6 +1,6 @@
 using BsCCaseApi.Business.Services;
 using BsCCaseApi.DataAccess.Store;
-using BsCOpenSearchSync.DataAccess.Services;
+using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.DataAccess.Store;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
