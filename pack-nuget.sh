@@ -59,28 +59,32 @@ update_references() {
 
   echo "Updating references for pattern: $pattern"
 
-  # Extract suffix from pattern: "*.Domain.csproj" → ".Domain"
-  local suffix
-  suffix=".$(echo "$pattern" | sed -E 's/^\*\.(.*)\.csproj/\1/')"
-
+  # Extract suffix: "*.Domain.csproj" → ".Domain"
+  local suffix=".$(echo "$pattern" | sed -E 's/^\*\.(.*)\.csproj/\1/')"
   echo "Detected suffix: $suffix"
 
-  # Find ALL csproj files in the repo
+  # Find ALL csproj files
   mapfile -t all_projects < <(find . -name "*.csproj" | sort)
 
   for proj in "${all_projects[@]}"; do
-    echo "Scanning $proj for PackageReferences ending with $suffix"
+    echo "Scanning $proj"
 
-    # Update any PackageReference Include="Something.Domain"
+    #
+    # 1. Update inline Version="..."
+    #
     sed -i -E \
-      "s|( <PackageReference Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\"[^>]*/>)|\1${VERSION}\3|g" \
-      "$proj" || true
+      "s|(Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\")|\1${VERSION}\3|g" \
+      "$proj"
 
+    #
+    # 2. Update <Version>...</Version> inside a PackageReference
+    #
     sed -i -E \
-      "s|(<PackageReference Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\"[^>]*/>)|\1${VERSION}\3|g" \
-      "$proj" || true
+      "/Include=\"[^\"]*${suffix}\"/,/<\/PackageReference>/ s|<Version>[0-9A-Za-z\.\-]+</Version>|<Version>${VERSION}</Version>|g" \
+      "$proj"
   done
 }
+
 
 
 echo "=== LAYER 1: .Domain ==="
