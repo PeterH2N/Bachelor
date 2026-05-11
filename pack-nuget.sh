@@ -55,55 +55,50 @@ build_pack_layer() {
 }
 
 update_references() {
-  local description="$1"
-  local target_pattern="$2"
-  local depends_suffix="$3"
+  local pattern="$1"   # e.g. "*.Domain.csproj"
 
-  echo "Updating references in $description"
-  mapfile -t targets < <(find . -name "$target_pattern" | sort)
+  echo "Updating references for pattern: $pattern"
 
-  if [ ${#targets[@]} -eq 0 ]; then
-    echo "No target projects found for pattern: $target_pattern"
-    return 0
-  fi
+  # Extract suffix from pattern: "*.Domain.csproj" → ".Domain"
+  local suffix
+  suffix=".$(echo "$pattern" | sed -E 's/^\*\.(.*)\.csproj/\1/')"
 
-  for proj in "${targets[@]}"; do
-    echo "Processing $proj"
+  echo "Detected suffix: $suffix"
 
-    # Update any PackageReference whose Include ends with the given suffix
-    # Example: *.Domain, *.DataAccess, *.Client
-    if grep -q "<PackageReference Include=\".*${depends_suffix}\"" "$proj"; then
-      sed -i -E "s|( <PackageReference Include=\"[^\"]*${depends_suffix}\"[^>]*Version=\")([^\"]+)(\"[^>]*/>)|\1${VERSION}\3|g" "$proj" || true
-      sed -i -E "s|(<PackageReference Include=\"[^\"]*${depends_suffix}\"[^>]*Version=\")([^\"]+)(\"[^>]*/>)|\1${VERSION}\3|g" "$proj" || true
-    fi
+  # Find ALL csproj files in the repo
+  mapfile -t all_projects < <(find . -name "*.csproj" | sort)
+
+  for proj in "${all_projects[@]}"; do
+    echo "Scanning $proj for PackageReferences ending with $suffix"
+
+    # Update any PackageReference Include="Something.Domain"
+    sed -i -E \
+      "s|( <PackageReference Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\"[^>]*/>)|\1${VERSION}\3|g" \
+      "$proj" || true
+
+    sed -i -E \
+      "s|(<PackageReference Include=\"[^\"]*${suffix}\"[^>]*Version=\")([^\"]+)(\"[^>]*/>)|\1${VERSION}\3|g" \
+      "$proj" || true
   done
 }
+
 
 echo "=== LAYER 1: .Domain ==="
 build_pack_layer "Domain" "*.Domain.csproj"
 
-echo "=== Update .DataAccess references to .Domain ==="
-update_references ".DataAccess projects" "*.DataAccess.csproj" ".Domain"
+echo "=== Update references to .Domain ==="
+update_references "*.Domain.csproj"
 
 echo "=== LAYER 2: .DataAccess ==="
 build_pack_layer "DataAccess" "*.DataAccess.csproj"
 
-echo "=== Update .Client references to .DataAccess ==="
-update_references ".Client projects" "*.Client.csproj" ".DataAccess"
+echo "=== Update references to .DataAccess ==="
+update_references "*.DataAccess.csproj"
 
 echo "=== LAYER 3: .Client ==="
 build_pack_layer "Client" "*.Client.csproj"
 
-echo "=== Update .Business references to .Client ==="
-update_references ".Business projects" "*.Business.csproj" ".Client"
-
-echo "=== Update .Api references to .Client ==="
-update_references ".Api projects" "*.Api.csproj" ".Client"
-
-echo "=== LAYER 4: .Business ==="
-build_pack_layer "Business" "*.Business.csproj"
-
-echo "=== LAYER 5: .Api ==="
-build_pack_layer "Api" "*.Api.csproj"
+echo "=== Update references to .Client ==="
+update_references "*.Client.csproj"
 
 echo "All layers processed."
