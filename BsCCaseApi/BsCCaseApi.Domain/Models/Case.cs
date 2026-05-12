@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using BsCCaseApi.Domain.enums;
+using BsCCaseApi.Domain.Interfaces;
 
 namespace BsCCaseApi.Domain.Models;
 
-public class Case
+public class Case : IHasId
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     [MaxLength(200)]

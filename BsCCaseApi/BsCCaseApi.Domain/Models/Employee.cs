@@ -1,8 +1,9 @@
 using System.Text.Json.Serialization;
+using BsCCaseApi.Domain.Interfaces;
 
 namespace BsCCaseApi.Domain.Models;
 
-public class Employee
+public class Employee : IHasId
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string NameInitials { get; set; }

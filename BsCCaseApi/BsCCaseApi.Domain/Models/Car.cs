@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using BsCCaseApi.Domain.Interfaces;
 
 namespace BsCCaseApi.Domain.Models;
-[Table("Cars")]
-public class Car
+
+public class Car : IHasId
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public int CustomerId { get; set; }

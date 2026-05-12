@@ -1,8 +1,9 @@
 using System.Text.Json.Serialization;
+using BsCCaseApi.Domain.Interfaces;
 
 namespace BsCCaseApi.Domain.Models;
 
-public class Customer
+public class Customer : IHasId
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Email { get; set; }
