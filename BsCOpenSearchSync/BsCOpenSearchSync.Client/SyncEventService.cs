@@ -36,6 +36,7 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
             ObjectId = obj is T objT ? objT.Id : (Guid)obj
         };
         await eventDbContext.SyncEvents.AddAsync(@event);
+        await eventDbContext.SaveChangesAsync();
         await dbContext.SaveChangesAsync();
         return returnObject;
     }

@@ -22,7 +22,12 @@ builder.Services.AddScoped<ICaseService, CaseService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
-builder.Services.AddScoped<ISyncEventService, SyncEventService>();
+builder.Services.AddScoped<ISyncEventService, SyncEventService>(serviceProvider =>
+{
+    var db = serviceProvider.GetRequiredService<AppDbContext>();
+    var eventDb = serviceProvider.GetRequiredService<EventDbContext>();
+    return new SyncEventService(eventDb, db);
+});
 
 builder.Services.AddControllers();
 
