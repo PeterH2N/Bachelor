@@ -23,10 +23,12 @@ public class CaseController(ICaseService caseService)
         return caseService.CreateCase(@case.ToCase());
     }
 
-    [HttpPatch]
-    public Task<Case> Update([FromBody] CaseDto @case)
+    [HttpPatch("{caseId:int}")]
+    public Task<Case> Update([FromBody] CaseDto @case, Guid caseId)
     {
-        return caseService.UpdateCase(@case.ToCase());
+        var caseToUpdate = @case.ToCase();
+        caseToUpdate.Id = caseId;
+        return caseService.UpdateCase(caseToUpdate);
     }
 
     [HttpDelete("{caseId:int}")]

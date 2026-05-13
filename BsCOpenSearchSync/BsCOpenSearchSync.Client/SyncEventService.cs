@@ -28,6 +28,8 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
             default:
                 return returnObject;
         }
+        
+        await dbContext.SaveChangesAsync();
 
         var @event = new SyncEvent
         {
@@ -37,7 +39,6 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         };
         await eventDbContext.SyncEvents.AddAsync(@event);
         await eventDbContext.SaveChangesAsync();
-        await dbContext.SaveChangesAsync();
         return returnObject;
     }
     public async Task AddSyncEvent(SyncEvent syncEvent)

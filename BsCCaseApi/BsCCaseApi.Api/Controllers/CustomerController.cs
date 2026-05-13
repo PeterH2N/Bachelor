@@ -21,9 +21,11 @@ public class CustomerController(ICustomerService customerService)
         return customerService.CreateCustomer(customer.ToCustomer());
     }
 
-    [HttpPatch]
-    public Task<Customer> Update([FromBody] CustomerDto customer)
+    [HttpPatch("{customerId:guid}")]
+    public Task<Customer> Update([FromBody] CustomerDto customer, Guid customerId)
     {
-        return customerService.UpdateCustomer(customer.ToCustomer());
+        var customerToUpdate = customer.ToCustomer();
+        customerToUpdate.Id = customerId;
+        return customerService.UpdateCustomer(customerToUpdate);
     }
 }

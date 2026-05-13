@@ -2,7 +2,6 @@ using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.Domain.Enums;
-using BsCOpenSearchSync.Domain.Models.Events;
 
 namespace BsCCaseApi.Business.Services;
 
@@ -16,26 +15,11 @@ public class CustomerService(AppDbContext dbContext, ISyncEventService syncEvent
 
     public async Task CreateCustomer(Customer customer)
     {
-        var created = await dbContext.Customers.AddAsync(customer);
-        await syncEventService.AddSyncEvent(new SyncEvent
-        {
-            ObjectId = created.Entity.Id,
-            TableName = "Customers",
-            Type = SyncType.Create
-        });
-        await dbContext.SaveChangesAsync();
+        await syncEventService.DoOperation<Customer>(SyncType.Create, customer);
     }
 
     public async Task<Customer> UpdateCustomer(Customer customer)
     {
-        var updated = dbContext.Customers.Update(customer);
-        await syncEventService.AddSyncEvent(new SyncEvent
-        {
-            ObjectId = updated.Entity.Id,
-            TableName = "Customers",
-            Type = SyncType.Update
-        });
-        await dbContext.SaveChangesAsync();
-        return updated.Entity;
+        return await syncEventService.DoOperation<Customer>(SyncType.Update, customer);
     }
 }

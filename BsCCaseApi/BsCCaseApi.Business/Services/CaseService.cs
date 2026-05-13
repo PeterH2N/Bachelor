@@ -2,7 +2,6 @@ using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.Domain.Enums;
-using BsCOpenSearchSync.Domain.Models.Events;
 
 namespace BsCCaseApi.Business.Services;
 
@@ -16,44 +15,16 @@ public class CaseService(AppDbContext dbContext, ISyncEventService syncEventServ
 
     public async Task CreateCase(Case @case)
     {
-        var created = await dbContext.Cases.AddAsync(@case);
-
-        await syncEventService.AddSyncEvent(new SyncEvent
-        {
-            ObjectId = created.Entity.Id,
-            TableName = "Cases",
-            Type = SyncType.Create
-        });
-        await dbContext.SaveChangesAsync();
+        await syncEventService.DoOperation<Case>(SyncType.Create, @case);
     }
 
     public async Task DeleteCase(int caseId)
     {
-        var @case = await dbContext.Cases.FindAsync(caseId);
-        if (@case == null)
-        {
-            throw new Exception($"Case {caseId} not found");
-        }
-        dbContext.Cases.Remove(@case);
-        await syncEventService.AddSyncEvent(new SyncEvent
-        {
-            ObjectId = @case.Id,
-            TableName = "Cases",
-            Type = SyncType.Delete
-        });
-        await dbContext.SaveChangesAsync();
+        await syncEventService.DoOperation<Case>(SyncType.Delete, caseId);
     }
 
     public async Task<Case> UpdateCase(Case @case)
     {
-        var updated = dbContext.Cases.Update(@case);
-        await syncEventService.AddSyncEvent(new SyncEvent
-        {
-            ObjectId = updated.Entity.Id,
-            TableName = "Cases",
-            Type = SyncType.Update
-        });
-        await dbContext.SaveChangesAsync();
-        return updated.Entity;
+        return await syncEventService.DoOperation<Case>(SyncType.Update, @case);
     }
 }

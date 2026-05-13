@@ -24,12 +24,15 @@ public class CarController(ICarService carService)
     [HttpPut]
     public Task Create([FromBody] CarDto car)
     {
+        
         return carService.CreateCar(car.ToCar());
     }
 
-    [HttpPatch]
-    public Task<Car> Update([FromBody] CarDto car)
+    [HttpPatch("{carId:guid}")]
+    public Task<Car> Update([FromBody] CarDto car, Guid carId)
     {
+        var carToUpdate = car.ToCar();
+        carToUpdate.Id = carId;
         return carService.UpdateCar(car.ToCar());
     }
 }

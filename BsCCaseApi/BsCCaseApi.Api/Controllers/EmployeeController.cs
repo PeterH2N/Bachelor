@@ -21,9 +21,11 @@ public class EmployeeController(IEmployeeService employeeService)
         return employeeService.CreateEmployee(employee.ToEmployee());
     }
 
-    [HttpPatch]
-    public Task<Employee> Update([FromBody] EmployeeDto employee)
+    [HttpPatch("{employeeId:guid}")]
+    public Task<Employee> Update([FromBody] EmployeeDto employee, Guid employeeId)
     {
-        return employeeService.UpdateEmployee(employee.ToEmployee());
+        var employeeToUpdate = employee.ToEmployee();
+        employeeToUpdate.Id = employeeId;
+        return employeeService.UpdateEmployee(employeeToUpdate);
     }
 }
