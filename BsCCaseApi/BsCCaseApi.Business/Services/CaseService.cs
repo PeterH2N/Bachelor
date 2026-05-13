@@ -2,14 +2,27 @@ using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
 public class CaseService(AppDbContext dbContext, ISyncEventService syncEventService) : ICaseService
 {
+    public async Task<List<Case>> GetAllCases()
+    {
+        return await dbContext.Cases
+            .Include(c => c.Customer)
+            .Include(c => c.Car)
+            .Include(c=> c.Employee)
+            .ToListAsync();
+    }
     public async Task<Case> GetCaseById(Guid caseId)
     {
-        var @case = await dbContext.Cases.FindAsync(caseId);
+        var @case = await dbContext.Cases
+            .Include(c => c.Customer)
+            .Include(c => c.Car)
+            .Include(c=> c.Employee)
+            .FirstOrDefaultAsync(c => c.Id == caseId);
         return @case ?? throw new Exception("Case not found");
     }
 

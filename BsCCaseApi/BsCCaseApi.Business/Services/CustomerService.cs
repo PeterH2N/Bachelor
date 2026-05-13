@@ -2,11 +2,17 @@ using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
 public class CustomerService(AppDbContext dbContext, ISyncEventService syncEventService) : ICustomerService
 {
+    public async Task<List<Customer>> GetAllCustomers()
+    {
+        return await dbContext.Customers.ToListAsync();
+    }
+
     public async Task<Customer> GetCustomerById(Guid customerId)
     {
         var customer = await dbContext.Customers.FindAsync(customerId);

@@ -9,11 +9,11 @@ public class CaseDto
     public string CaseName { get; set; } = string.Empty;
     public string CaseDescription { get; set; } = string.Empty;
     public CaseType CaseType { get; set; }
-    public int CustomerId { get; set; }
+    public Guid CustomerId { get; set; }
     
-    public int EmployeeId { get; set; }
+    public Guid EmployeeId { get; set; }
     
-    public int? CarId { get; set; }
+    public Guid? CarId { get; set; }
     
     public DateTime DeliveryDate { get; set; }
     public DateTime CompleteDate { get; set; }

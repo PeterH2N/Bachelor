@@ -10,7 +10,11 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
 {
     public async Task<T?> DoOperation<T>(SyncType type, object obj) where T : class, IHasId
     {
-        var tableName = typeof(T).Name + "s"; // generalization, not great
+        var tableName = dbContext.Model.FindEntityType(typeof(T))?.GetTableName();
+        if (tableName is null)
+        {
+            throw new Exception("Not a valid type: " + typeof(T).Name);
+        }
         
         T? returnObject = null;
         

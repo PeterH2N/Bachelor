@@ -2,11 +2,17 @@ using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
 public class EmployeeService(AppDbContext dbContext, ISyncEventService syncEventService) : IEmployeeService
 {
+    public async Task<List<Employee>> GetAllEmployees()
+    {
+        return await dbContext.Employees.ToListAsync();
+    }
+
     public async Task<Employee> GetEmployeeById(Guid employeeId)
     {
         var employee = await dbContext.Employees.FindAsync(employeeId);

@@ -7,7 +7,7 @@ namespace BsCCaseApi.Domain.Models;
 
 public class Case : IHasId
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.CreateVersion7();
     [MaxLength(200)]
     public string CaseName { get; set; } = string.Empty;
     [MaxLength(1000)]
@@ -15,13 +15,13 @@ public class Case : IHasId
     public CaseType CaseType { get; set; }
     public Customer? Customer { get; set; }
     [JsonIgnore]
-    public int CustomerId { get; set; }
+    public Guid CustomerId { get; set; }
     public Employee? Employee { get; set; }
     [JsonIgnore]
-    public int EmployeeId { get; set; }
+    public Guid EmployeeId { get; set; }
     public Car? Car { get; set; }
     [JsonIgnore]
-    public int? CarId { get; set; }
+    public Guid? CarId { get; set; }
     public DateTime DeliveryDate { get; set; }
     public DateTime CompleteDate { get; set; }
     public DateTime BeginTime { get; set; }

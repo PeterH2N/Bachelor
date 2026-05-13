@@ -6,8 +6,8 @@ namespace BsCCaseApi.Domain.Models;
 
 public class Car : IHasId
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public int CustomerId { get; set; }
+    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid CustomerId { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenReading)]
     public Customer? Customer { get; set; }
     public string RegNo { get; set; }

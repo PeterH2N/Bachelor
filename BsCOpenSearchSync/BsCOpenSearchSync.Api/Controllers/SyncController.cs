@@ -25,4 +25,10 @@ public class SyncController(ISyncService syncService)
     {
         return syncService.GetAllEvents();
     }
+
+    [HttpPost("{eventId:int}")]
+    public Task<string> DoSync(int eventId)
+    {
+        return syncService.DoSync(eventId);
+    }
 }

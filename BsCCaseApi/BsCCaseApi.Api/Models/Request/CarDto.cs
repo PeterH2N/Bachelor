@@ -4,7 +4,7 @@ namespace BsCCaseApi.Models.Request;
 
 public class CarDto
 {
-    public int CustomerId { get; set; }
+    public Guid CustomerId { get; set; }
     public string RegNo { get; set; }
     public string Make { get; set; }
     public string Model { get; set; }

@@ -16,7 +16,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CaseDbContext>();
 builder.Services.AddDbContext<EventDbContext>();
-builder.Services.AddScoped<ISyncService, SyncService>();
+builder.Services.AddScoped<ISyncService, SyncService>(serviceProvider =>
+{
+    var eventDbContext = serviceProvider.GetRequiredService<EventDbContext>();
+    var caseDbContext = serviceProvider.GetRequiredService<CaseDbContext>();
+    
+    return new SyncService(eventDbContext, caseDbContext);
+});
 
 builder.Services.AddControllers();
 

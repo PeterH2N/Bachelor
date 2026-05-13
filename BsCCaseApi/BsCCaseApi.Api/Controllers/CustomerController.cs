@@ -9,6 +9,12 @@ namespace BsCCaseApi.Controllers;
 [ApiController]
 public class CustomerController(ICustomerService customerService)
 {
+    [HttpGet]
+    public Task<List<Customer>> GetAll()
+    {
+        return customerService.GetAllCustomers();
+    }
+    
     [HttpGet("{customerId:guid}")]
     public Task<Customer> Get(Guid customerId)
     {

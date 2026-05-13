@@ -12,7 +12,7 @@ public class CarController(ICarService carService)
     [HttpGet]
     public Task<List<Car>> GetAll()
     {
-        return carService.GetAll();
+        return carService.GetAllCars();
     }
     
     [HttpGet("{carId:guid}")]
@@ -33,6 +33,6 @@ public class CarController(ICarService carService)
     {
         var carToUpdate = car.ToCar();
         carToUpdate.Id = carId;
-        return carService.UpdateCar(car.ToCar());
+        return carService.UpdateCar(carToUpdate);
     }
 }

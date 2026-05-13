@@ -8,14 +8,14 @@ namespace BsCCaseApi.Business.Services;
 
 public class CarService(AppDbContext dbContext, ISyncEventService syncEventService) : ICarService
 {
-    public async Task<List<Car>> GetAll()
+    public async Task<List<Car>> GetAllCars()
     {
-        return await dbContext.Cars.ToListAsync();
+        return await dbContext.Cars.Include(c => c.Customer).ToListAsync();
     }
 
     public async Task<Car> GetCarById(Guid carId)
     {
-        var car = await dbContext.Cars.FindAsync(carId);
+        var car = await dbContext.Cars.Include(c => c.Customer).FirstOrDefaultAsync(c => c.Id == carId);
         return car ?? throw new Exception($"Car not found");
     }
 

@@ -10,6 +10,11 @@ namespace BsCCaseApi.Controllers;
 [ApiController]
 public class CaseController(ICaseService caseService)
 {
+    [HttpGet]
+    public Task<List<Case>> GetAll()
+    {
+        return caseService.GetAllCases();
+    }
 
     [HttpGet("{caseId:guid}")]
     public Task<Case> Get(Guid caseId)

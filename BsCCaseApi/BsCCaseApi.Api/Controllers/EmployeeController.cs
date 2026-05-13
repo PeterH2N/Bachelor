@@ -9,6 +9,12 @@ namespace BsCCaseApi.Controllers;
 [ApiController]
 public class EmployeeController(IEmployeeService employeeService)
 {
+    [HttpGet]
+    public Task<List<Employee>> GetAll()
+    {
+        return employeeService.GetAllEmployees();
+    }
+    
     [HttpGet("{employeeId:guid}")]
     public Task<Employee> Get(Guid employeeId)
     {

@@ -5,7 +5,7 @@ namespace BsCCaseApi.Domain.Models;
 
 public class Employee : IHasId
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.CreateVersion7();
     public string NameInitials { get; set; }
     public string Firstname { get; set; }
     public string Lastname { get; set; }
