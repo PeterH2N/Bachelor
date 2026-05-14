@@ -10,7 +10,7 @@
 
         <!-- NuGet package metadata -->
         <PackageId>BsCOpenSearchSync.DataAccess</PackageId>
-        <Version>1.2.30</Version>
+        <Version>1.2.32</Version>
         <Authors>PeterH2N</Authors>
         <Company>SDU</Company>
         <Description>Database context for BsCCaseApi.</Description>
@@ -27,7 +27,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BsCCaseApi.Domain" Version="1.2.30" />
+      <PackageReference Include="BsCCaseApi.Domain" Version="1.2.32" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
         <PrivateAssets>all</PrivateAssets>

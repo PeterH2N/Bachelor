@@ -9,7 +9,7 @@
 
         <!-- NuGet package metadata -->
         <PackageId>BsCCaseApi.Domain</PackageId>
-        <Version>1.2.30</Version>
+        <Version>1.2.32</Version>
         <Authors>PeterH2N</Authors>
         <Company>SDU</Company>
         <Description>Domain models and value objects for BsCCaseApi.</Description>
