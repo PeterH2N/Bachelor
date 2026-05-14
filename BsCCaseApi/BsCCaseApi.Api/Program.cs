@@ -23,12 +23,18 @@ builder.Services.AddScoped<ICaseService, CaseService>();
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
-builder.Services.AddScoped<ISyncEventService, SyncEventService>(serviceProvider =>
-{
-    var db = serviceProvider.GetRequiredService<AppDbContext>();
-    var eventDb = serviceProvider.GetRequiredService<EventDbContext>();
-    return new SyncEventService(eventDb, db);
-});
+builder.Services.AddHttpClient<ISyncEventService, SyncEventService>((serviceProvider, client) =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["SyncService:BaseUrl"]!);
+    })
+    .AddTypedClient<ISyncEventService>((httpClient, serviceProvider) =>
+    {
+        var db = serviceProvider.GetRequiredService<AppDbContext>();
+        var eventDb = serviceProvider.GetRequiredService<EventDbContext>();
+        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        return new SyncEventService(eventDb, db, httpClient, loggerFactory.CreateLogger<SyncEventService>());
+    });
+
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddControllers();

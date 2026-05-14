@@ -11,7 +11,7 @@
     <ItemGroup>
         <PackageReference Include="bsccaseapi.dataaccess" Version="1.2.30" />
         <PackageReference Include="DotNetEnv" Version="3.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.7" />
     </ItemGroup>

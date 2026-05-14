@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BsCOpenSearchSync.Client;
 
-public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext, HttpClient httpClient, ILogger logger) : ISyncEventService
+public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext, HttpClient httpClient, ILogger<SyncEventService> logger) : ISyncEventService
 {
     public async Task<T?> DoOperation<T>(SyncType type, object obj) where T : class, IHasId
     {
