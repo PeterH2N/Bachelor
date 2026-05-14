@@ -3,10 +3,11 @@ using BsCOpenSearchSync.DataAccess.Store;
 using BsCOpenSearchSync.Domain.Enums;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BsCOpenSearchSync.Client;
 
-public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext, HttpClient httpClient) : ISyncEventService
+public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext, HttpClient httpClient, ILogger logger) : ISyncEventService
 {
     public async Task<T?> DoOperation<T>(SyncType type, object obj) where T : class, IHasId
     {
@@ -43,6 +44,8 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         };
         await eventDbContext.SyncEvents.AddAsync(@event);
         await eventDbContext.SaveChangesAsync();
+        // calls sync endpoint but does not wait for it
+        CallSyncEndpoint();
         return returnObject;
     }
     public async Task AddSyncEvent(SyncEvent syncEvent)
@@ -82,5 +85,25 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         }
         dbContext.Remove(objT);
         return objT;
+    }
+
+    // Does not require parameters, call will sync all available events
+    private void CallSyncEndpoint()
+    {
+        const string url = $"api/Sync/doAll";
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.Add("Accept", "application/json");
+                await httpClient.SendAsync(request);
+            }
+            catch (HttpRequestException e)
+            {
+                logger.LogError(e, "Error during sync endpoint");
+            }
+        });
     }
 }
