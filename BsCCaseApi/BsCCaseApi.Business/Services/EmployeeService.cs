@@ -21,7 +21,7 @@ public class EmployeeService(AppDbContext dbContext, ISyncEventService syncEvent
 
     public async Task CreateEmployee(Employee employee)
     {
-        await syncEventService.DoOperation<Case>(SyncType.Create, employee);
+        await syncEventService.DoOperation<Employee>(SyncType.Create, employee);
     }
 
     public async Task<Employee> UpdateEmployee(Employee employee)

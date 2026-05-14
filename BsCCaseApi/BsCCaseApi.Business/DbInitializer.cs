@@ -1,11 +1,13 @@
 using Bogus;
+using BsCCaseApi.Business.Services;
+using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 
-namespace BsCCaseApi.DataAccess.Store;
+namespace BsCCaseApi.Business;
 
-public static class DbInitializer
+public class DbInitializer(AppDbContext context, ICarService carService, IEmployeeService employeeService, ICaseService caseService, ICustomerService customerService): IDbInitializer
 {
-    public static async Task SeedData(AppDbContext context)
+    public async Task SeedData()
     {
         Randomizer.Seed = new Random(1337);
 
@@ -20,9 +22,11 @@ public static class DbInitializer
                 .RuleFor(c => c.Firstname, f => f.Name.FirstName())
                 .RuleFor(c => c.Lastname, f => f.Name.LastName());
             
-            var customers = faker.Generate(100);
-            context.Customers.AddRange(customers);
-            await context.SaveChangesAsync();
+            var customers = faker.Generate(20);
+            foreach (var customer in customers)
+            {
+                await  customerService.CreateCustomer(customer);
+            }
             dbCustomers = context.Customers.ToList();
         }
 
@@ -34,8 +38,10 @@ public static class DbInitializer
                 .RuleFor(e => e.NameInitials, f => f.Random.AlphaNumeric(3));
 
             var employees = faker.Generate(10);
-            context.Employees.AddRange(employees);
-            await context.SaveChangesAsync();
+            foreach (var employee in employees)
+            {
+                await employeeService.CreateEmployee(employee);
+            }
             dbEmployees = context.Employees.ToList();
         }
 
@@ -48,9 +54,11 @@ public static class DbInitializer
                 .RuleFor(c => c.VIN, f => f.Random.AlphaNumeric(17))
                 .RuleFor(c => c.Customer, f => f.Random.CollectionItem(dbCustomers));
             
-            var cars = faker.Generate(50);
-            context.Cars.AddRange(cars);
-            await context.SaveChangesAsync();
+            var cars = faker.Generate(30);
+            foreach (var car in cars)
+            {
+                await carService.CreateCar(car);
+            }
             dbCars = context.Cars.ToList();
         }
 
@@ -70,9 +78,11 @@ public static class DbInitializer
                 .RuleFor(c => c.DeletedDate, (f, c) => c.Deleted ? f.Date.Between(c.BeginTime, c.CompleteDate) : null)
                 .RuleFor(c => c.ModifiedDate, (f, c) => c.EndTime);
             
-            var cases = faker.Generate(100);
-            context.Cases.AddRange(cases);
-            await context.SaveChangesAsync();
+            var cases = faker.Generate(20);
+            foreach (var @case in cases)
+            {
+                await caseService.CreateCase(@case);
+            }
         }
     }
 }

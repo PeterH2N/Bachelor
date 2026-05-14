@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BsCOpenSearchSync.Client;
 
-public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext) : ISyncEventService
+public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext, HttpClient httpClient) : ISyncEventService
 {
     public async Task<T?> DoOperation<T>(SyncType type, object obj) where T : class, IHasId
     {

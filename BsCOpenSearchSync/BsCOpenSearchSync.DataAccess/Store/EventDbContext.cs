@@ -6,7 +6,6 @@ namespace BsCOpenSearchSync.DataAccess.Store;
 public class EventDbContext : DbContext
 {
     public DbSet<SyncEvent>  SyncEvents { get; set; }
-    public DbSet<LatestSync> LatestSyncs { get; set; }
     
     private readonly string _connectionString = Environment.GetEnvironmentVariable("DB_URL") ?? string.Empty;
 
@@ -19,7 +18,6 @@ public class EventDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<LatestSync>()
-            .HasData(new LatestSync{ Value = 0 });
+
     }
 }

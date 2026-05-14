@@ -8,12 +8,6 @@ namespace BsCOpenSearchSync.Controllers;
 [ApiController]
 public class SyncController(ISyncService syncService)
 {
-    [HttpGet]
-    public Task<LatestSync> GetLatestSync()
-    {
-        return syncService.GetLatestSync();
-    }
-    
     [HttpGet("{id:int}")]
     public Task<SyncEvent> GetEvent(int id)
     {
@@ -30,5 +24,11 @@ public class SyncController(ISyncService syncService)
     public Task<string> DoSync(int eventId)
     {
         return syncService.DoSync(eventId);
+    }
+
+    [HttpPost]
+    public Task<string> DoAll(SyncEvent syncEvent)
+    {
+        return syncService.DoAllSyncs();
     }
 }

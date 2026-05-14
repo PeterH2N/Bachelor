@@ -1,11 +1,25 @@
 using System.Text.Json;
+using BsCOpenSearchSync.Domain.Enums;
+using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace BsCOpenSearchSync.Business.Helpers;
 
 public class JsonProcessor(DbContext dbContext)
 {
-    public string JsonBulkFromId(Guid id, string tableName)
+    public string BulkJsonFromIds(IEnumerable<SyncEvent> syncEvents)
+    {
+        var bulkJson  = "";
+        foreach (var syncEvent in syncEvents)
+        {
+            bulkJson += JsonBulkFromId(syncEvent.Type, syncEvent.ObjectId, syncEvent.TableName);
+            bulkJson += "\n";
+        }
+        
+        return bulkJson;
+    }
+    
+    public string JsonBulkFromId(SyncType syncType, Guid id, string tableName)
     {
         var type = FindEntityTypeForTable(tableName);
         if (type is null)
@@ -18,7 +32,10 @@ public class JsonProcessor(DbContext dbContext)
             throw new Exception($"No entity with id {id} found");
         }
 
-        return JsonSerializer.Serialize(result);
+        var resJson = JsonSerializer.Serialize(result);
+        var actionLine = GetActionLine(syncType, tableName, id);
+        
+        return actionLine + "\n" + resJson;
     }
     
     private Type? FindEntityTypeForTable(string tableName)
@@ -47,5 +64,10 @@ public class JsonProcessor(DbContext dbContext)
         var keyProperty = entityMeta.FindPrimaryKey()!.Properties[0];
         return set.Cast<object>().FirstOrDefault(e => 
             EF.Property<object>(e, keyProperty.Name).Equals(id));
+    }
+
+    private string GetActionLine(SyncType type, string index, Guid id)
+    {
+        return $"{{ \"{type.ToString().ToLowerInvariant()}\": {{\"_index\": \"{index}\", \"_id\": \"{id}\" }} }}";
     }
 }

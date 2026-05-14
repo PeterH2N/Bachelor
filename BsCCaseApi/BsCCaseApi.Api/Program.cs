@@ -1,3 +1,4 @@
+using BsCCaseApi.Business;
 using BsCCaseApi.Business.Services;
 using BsCCaseApi.DataAccess.Store;
 using BsCOpenSearchSync.Client;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<ISyncEventService, SyncEventService>(serviceProvider 
     var eventDb = serviceProvider.GetRequiredService<EventDbContext>();
     return new SyncEventService(eventDb, db);
 });
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddControllers();
 
@@ -37,8 +39,9 @@ app.MapControllers();
 // migrate and seed database
 using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 context.Database.Migrate(); // applies migrations
-await DbInitializer.SeedData(context); // seeds data
+await initializer.SeedData(); // seeds data
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
