@@ -26,6 +26,15 @@ public class JsonProcessor(DbContext dbContext)
         {
             throw new Exception($"Table {tableName} not found");
         }
+        
+        var actionLine = GetActionLine(syncType, tableName, id);
+        
+        // if deleting, we should not try to find the object
+        if (syncType == SyncType.Delete)
+        {
+            return actionLine + "\n";
+        }
+        
         var result = FindWithRelationships(type, id);
         if (result is null)
         {
@@ -33,8 +42,7 @@ public class JsonProcessor(DbContext dbContext)
         }
 
         var resJson = JsonSerializer.Serialize(result);
-        var actionLine = GetActionLine(syncType, tableName, id);
-        
+
         return actionLine + "\n" + resJson;
     }
     
@@ -68,6 +76,6 @@ public class JsonProcessor(DbContext dbContext)
 
     private string GetActionLine(SyncType type, string index, Guid id)
     {
-        return $"{{ \"{type.ToString().ToLowerInvariant()}\": {{\"_index\": \"{index}\", \"_id\": \"{id}\" }} }}";
+        return $"{{ \"{type.ToString().ToLowerInvariant()}\": {{\"_index\": \"{index.ToLowerInvariant()}\", \"_id\": \"{id}\" }} }}";
     }
 }

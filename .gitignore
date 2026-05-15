@@ -4,4 +4,4 @@
 bin/
 obj/
 *.csproj.bak
-.nuget/
+nuget/

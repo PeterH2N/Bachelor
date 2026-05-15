@@ -27,7 +27,7 @@ public class SyncController(ISyncService syncService)
     }
 
     [HttpPost]
-    public Task<string> DoAll(SyncEvent syncEvent)
+    public Task DoAll()
     {
         return syncService.DoAllSyncs();
     }

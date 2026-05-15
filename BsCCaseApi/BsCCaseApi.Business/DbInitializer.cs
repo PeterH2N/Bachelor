@@ -27,8 +27,8 @@ public class DbInitializer(AppDbContext context, ICarService carService, IEmploy
             {
                 await  customerService.CreateCustomer(customer);
             }
-            dbCustomers = context.Customers.ToList();
         }
+        dbCustomers = context.Customers.ToList();
 
         if (!context.Employees.Any())
         {
@@ -42,8 +42,8 @@ public class DbInitializer(AppDbContext context, ICarService carService, IEmploy
             {
                 await employeeService.CreateEmployee(employee);
             }
-            dbEmployees = context.Employees.ToList();
         }
+        dbEmployees = context.Employees.ToList();
 
         if (!context.Cars.Any())
         {
@@ -59,8 +59,8 @@ public class DbInitializer(AppDbContext context, ICarService carService, IEmploy
             {
                 await carService.CreateCar(car);
             }
-            dbCars = context.Cars.ToList();
         }
+        dbCars = context.Cars.ToList();
 
         if (!context.Cases.Any())
         {
