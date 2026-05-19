@@ -1,5 +1,6 @@
 using BsCCaseApi.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace BsCCaseApi.DataAccess.Store;
 
@@ -15,8 +16,9 @@ public class AppDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(
-            _connectionString
-            );
+                _connectionString
+            )
+            .ConfigureWarnings(w => w.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

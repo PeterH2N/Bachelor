@@ -1,3 +1,4 @@
+using BsCOpenSearchSync.Business.Helpers;
 using BsCOpenSearchSync.Business.Services;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ namespace BsCOpenSearchSync.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class SyncController(ISyncService syncService) : ControllerBase
+public class SyncController(ISyncService syncService, IWebHostEnvironment env) : ControllerBase
 {
     [HttpGet("{id:int}")]
     public Task<SyncEvent> GetEvent(int id)
@@ -23,6 +24,10 @@ public class SyncController(ISyncService syncService) : ControllerBase
     [HttpPost]
     public Task DoAll()
     {
+        if (env.IsDevelopment() && SyncServiceFlags.TestIsUnresponsive)
+        {
+            Task.Delay(SyncServiceFlags.TestUnresponsiveDuration).Wait();
+        }
         return syncService.DoAllSyncs();
     }
 }

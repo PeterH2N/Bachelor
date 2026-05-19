@@ -15,7 +15,7 @@ public class StatsController(IStatsService statsService) : ControllerBase
     }
     
     [HttpGet]
-    public Task<Dictionary<Type, IEnumerable<Guid>>> GetDelta()
+    public Task<Dictionary<string, IEnumerable<Tuple<string, Guid>>>> GetDelta()
     {
         return statsService.GetDelta();
     }

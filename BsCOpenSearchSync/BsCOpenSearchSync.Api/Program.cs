@@ -1,9 +1,12 @@
 using System.Text;
+using BsCOpenSearchSync.Business.Helpers;
 using BsCOpenSearchSync.Business.Services;
 using BsCOpenSearchSync.DataAccess.Store;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using OpenSearch.Net;
+using Quartz;
 using Serilog;
 using CaseDbContext =  BsCCaseApi.DataAccess.Store.AppDbContext;
 
@@ -22,12 +25,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CaseDbContext>();
 builder.Services.AddDbContext<EventDbContext>();
 builder.Services.AddScoped<IStatsService, StatsService>();
-builder.Services.AddScoped<IOpenSearchLowLevelClient>(serviceProvider =>
+builder.Services.AddScoped<IOpenSearchLowLevelClient>(_ =>
 {
     var nodeAddress = new Uri(builder.Configuration["OpenSearch:BaseUrl"]!);
     var user = Environment.GetEnvironmentVariable("OPENSEARCH_USER");
     var pass = Environment.GetEnvironmentVariable("OPENSEARCH_PASS");
-    var logger = serviceProvider.GetRequiredService<ILogger<OpenSearchLowLevelClient>>();
     var settings = new ConnectionConfiguration(nodeAddress)
         .BasicAuthentication(user, pass)
         .RequestTimeout(TimeSpan.FromMinutes(5))
@@ -43,6 +45,18 @@ builder.Services.AddScoped<ISyncService, SyncService>(serviceProvider =>
     
     return new SyncService(eventDbContext, caseDbContext, openSearchClient, loggerFactory.CreateLogger<SyncService>());
 });
+builder.Services.AddScoped<IOpenSearchHealthCheck, OpenSearchHealthCheck>();
+
+// Health check job
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey(builder.Configuration["OpenSearch:JobKey"]!);
+    q.AddJob<OpenSearchHealthJob>(jobKey);
+    q.AddTrigger(t => t
+        .ForJob(jobKey)
+        .WithCronSchedule("0 */1 * * * ?")); // every minute
+});
+builder.Services.AddQuartzHostedService();
 
 builder.Services.AddControllers();
 

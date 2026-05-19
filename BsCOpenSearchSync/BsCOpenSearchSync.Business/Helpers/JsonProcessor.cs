@@ -2,6 +2,7 @@ using System.Text.Json;
 using BsCOpenSearchSync.Domain.Enums;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace BsCOpenSearchSync.Business.Helpers;
 
@@ -28,10 +29,9 @@ public class JsonProcessor(DbContext dbContext)
                 var aProps = a.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
                 var bProps = b.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
 
-                if (aProps.Count != bProps.Count) return false;
+                var commonKeys = aProps.Keys.Intersect(bProps.Keys);
 
-                return aProps.All(kvp =>
-                    bProps.TryGetValue(kvp.Key, out var bVal) && JsonEqual(kvp.Value, bVal));
+                return commonKeys.All(key => JsonEqual(aProps[key], bProps[key]));
 
             case JsonValueKind.Array:
                 var aArr = a.EnumerateArray().ToList();
@@ -59,7 +59,6 @@ public class JsonProcessor(DbContext dbContext)
                 return false;
         }
     }
-    
     private string JsonBulkFromId(SyncType syncType, Guid id, string tableName)
     {
         var type = FindEntityTypeForTable(tableName);
@@ -102,17 +101,41 @@ public class JsonProcessor(DbContext dbContext)
             .Invoke(dbContext, null)!;
 
         var entityMeta = dbContext.Model.FindEntityType(entityType)!;
-        foreach (var navigation in entityMeta.GetNavigations())
+
+        foreach (var path in GetIncludePaths(entityMeta))
         {
             set = EntityFrameworkQueryableExtensions.Include(
-                (IQueryable<object>)set, 
-                navigation.Name
+                (IQueryable<object>)set,
+                path
             );
         }
-        // Filter by primary key
+
         var keyProperty = entityMeta.FindPrimaryKey()!.Properties[0];
-        return set.Cast<object>().FirstOrDefault(e => 
+        return set.Cast<object>().FirstOrDefault(e =>
             EF.Property<object>(e, keyProperty.Name).Equals(id));
+    }
+
+    private static IEnumerable<string> GetIncludePaths(IEntityType entityType, string prefix = "", int maxDepth = 3, HashSet<IEntityType>? visited = null)
+    {
+        visited ??= new HashSet<IEntityType>();
+    
+        if (maxDepth == 0) yield break;
+        if (!visited.Add(entityType)) yield break; // already visiting this type, skip to avoid cycles
+
+        foreach (var navigation in entityType.GetNavigations())
+        {
+            var path = string.IsNullOrEmpty(prefix)
+                ? navigation.Name
+                : $"{prefix}.{navigation.Name}";
+
+            yield return path;
+
+            var targetType = navigation.TargetEntityType;
+            foreach (var nestedPath in GetIncludePaths(targetType, path, maxDepth - 1, visited))
+                yield return nestedPath;
+        }
+    
+        visited.Remove(entityType); // remove so it can be visited on other branches
     }
 
     private static string GetActionLine(SyncType type, string index, Guid id)

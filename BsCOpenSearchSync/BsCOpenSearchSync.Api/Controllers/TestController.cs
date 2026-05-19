@@ -1,4 +1,4 @@
-using BsCOpenSearchSync.Models;
+using BsCOpenSearchSync.Business.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BsCOpenSearchSync.Controllers;
@@ -14,8 +14,8 @@ public class TestController(IWebHostEnvironment env) : ControllerBase
         {
             return BadRequest();
         }
-        SyncServiceFlags.IsUnresponsive = true;
-        SyncServiceFlags.UnresponsiveDuration = TimeSpan.FromSeconds(seconds);
+        SyncServiceFlags.TestIsUnresponsive = true;
+        SyncServiceFlags.TestUnresponsiveDuration = TimeSpan.FromSeconds(seconds);
         
         return Ok();
     }
@@ -41,7 +41,7 @@ public class TestController(IWebHostEnvironment env) : ControllerBase
         {
             return BadRequest();
         }
-        SyncServiceFlags.IsUnresponsive = false;
+        SyncServiceFlags.TestIsUnresponsive = false;
         return Ok();
     }
 }
