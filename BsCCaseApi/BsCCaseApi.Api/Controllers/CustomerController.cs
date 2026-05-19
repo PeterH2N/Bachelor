@@ -7,7 +7,7 @@ namespace BsCCaseApi.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class CustomerController(ICustomerService customerService)
+public class CustomerController(ICustomerService customerService) : ControllerBase
 {
     [HttpGet]
     public Task<List<Customer>> GetAll()
@@ -33,5 +33,11 @@ public class CustomerController(ICustomerService customerService)
         var customerToUpdate = customer.ToCustomer();
         customerToUpdate.Id = customerId;
         return customerService.UpdateCustomer(customerToUpdate);
+    }
+    
+    [HttpPut]
+    public Task<List<Customer>> CreateRandom([FromQuery]int amount = 1)
+    {
+        return customerService.CreateRandomCustomer(amount);
     }
 }

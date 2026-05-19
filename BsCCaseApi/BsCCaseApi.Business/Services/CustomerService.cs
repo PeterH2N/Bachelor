@@ -1,3 +1,4 @@
+using BsCCaseApi.Business.Helpers;
 using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
-public class CustomerService(AppDbContext dbContext, ISyncEventService syncEventService) : ICustomerService
+public class CustomerService(AppDbContext dbContext, ISyncEventService syncEventService, IModelFaker modelFaker) : ICustomerService
 {
     public async Task<List<Customer>> GetAllCustomers()
     {
@@ -27,5 +28,15 @@ public class CustomerService(AppDbContext dbContext, ISyncEventService syncEvent
     public async Task<Customer> UpdateCustomer(Customer customer)
     {
         return await syncEventService.DoOperation<Customer>(SyncType.Update, customer);
+    }
+
+    public async Task<List<Customer>> CreateRandomCustomer(int amount)
+    {
+        var newCustomers = modelFaker.RandomCustomer(amount);
+        foreach (var newCustomer in newCustomers)
+        {
+            await syncEventService.DoOperation<Customer>(SyncType.Create, newCustomer);
+        }
+        return newCustomers;
     }
 }

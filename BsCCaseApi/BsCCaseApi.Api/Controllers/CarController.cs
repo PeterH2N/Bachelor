@@ -7,7 +7,7 @@ namespace BsCCaseApi.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class CarController(ICarService carService)
+public class CarController(ICarService carService) : ControllerBase
 {
     [HttpGet]
     public Task<List<Car>> GetAll()
@@ -29,10 +29,16 @@ public class CarController(ICarService carService)
     }
 
     [HttpPatch("{carId:guid}")]
-    public Task<Car> Update([FromBody] CarDto car, Guid carId)
+    public Task<Car?> Update([FromBody] CarDto car, Guid carId)
     {
         var carToUpdate = car.ToCar();
         carToUpdate.Id = carId;
         return carService.UpdateCar(carToUpdate);
+    }
+
+    [HttpPut]
+    public Task<List<Car>> CreateRandom([FromQuery]int amount = 1)
+    {
+        return carService.CreateRandomCar(amount);
     }
 }

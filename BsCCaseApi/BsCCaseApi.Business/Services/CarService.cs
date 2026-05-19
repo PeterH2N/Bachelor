@@ -1,3 +1,4 @@
+using BsCCaseApi.Business.Helpers;
 using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
-public class CarService(AppDbContext dbContext, ISyncEventService syncEventService) : ICarService
+public class CarService(AppDbContext dbContext, ISyncEventService syncEventService, IModelFaker modelFaker) : ICarService
 {
     public async Task<List<Car>> GetAllCars()
     {
@@ -24,8 +25,19 @@ public class CarService(AppDbContext dbContext, ISyncEventService syncEventServi
         await syncEventService.DoOperation<Car>(SyncType.Create, car);
     }
 
-    public async Task<Car> UpdateCar(Car car)
+    public async Task<Car?> UpdateCar(Car car)
     {
         return await syncEventService.DoOperation<Car>(SyncType.Update, car);
     }
+
+    public async Task<List<Car>> CreateRandomCar(int amount)
+    {
+        var newCars = modelFaker.RandomCar(amount);
+        foreach (var car in newCars)
+        {
+            await syncEventService.DoOperation<Car>(SyncType.Create, car);
+        }
+        
+        return newCars;
+    } 
 }

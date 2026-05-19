@@ -1,3 +1,4 @@
+using BsCCaseApi.Business.Helpers;
 using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
-public class CaseService(AppDbContext dbContext, ISyncEventService syncEventService) : ICaseService
+public class CaseService(AppDbContext dbContext, ISyncEventService syncEventService, IModelFaker modelFaker) : ICaseService
 {
     public async Task<List<Case>> GetAllCases()
     {
@@ -31,7 +32,7 @@ public class CaseService(AppDbContext dbContext, ISyncEventService syncEventServ
         await syncEventService.DoOperation<Case>(SyncType.Create, @case);
     }
 
-    public async Task DeleteCase(int caseId)
+    public async Task DeleteCase(Guid caseId)
     {
         await syncEventService.DoOperation<Case>(SyncType.Delete, caseId);
     }
@@ -39,5 +40,15 @@ public class CaseService(AppDbContext dbContext, ISyncEventService syncEventServ
     public async Task<Case> UpdateCase(Case @case)
     {
         return await syncEventService.DoOperation<Case>(SyncType.Update, @case);
+    }
+
+    public async Task<List<Case>> CreateRandomCase(int amount)
+    {
+        var newCases = modelFaker.RandomCase(amount);
+        foreach (var newCase in newCases)
+        {
+            await syncEventService.DoOperation<Case>(SyncType.Create, newCase);
+        }
+        return newCases;
     }
 }

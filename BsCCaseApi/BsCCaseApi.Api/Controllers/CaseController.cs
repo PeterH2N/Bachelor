@@ -8,7 +8,7 @@ namespace BsCCaseApi.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class CaseController(ICaseService caseService)
+public class CaseController(ICaseService caseService) : ControllerBase
 {
     [HttpGet]
     public Task<List<Case>> GetAll()
@@ -36,9 +36,15 @@ public class CaseController(ICaseService caseService)
         return caseService.UpdateCase(caseToUpdate);
     }
 
-    [HttpDelete("{caseId:int}")]
-    public Task Delete(int caseId)
+    [HttpDelete("{caseId:guid}")]
+    public Task Delete(Guid caseId)
     {
         return caseService.DeleteCase(caseId);
+    }
+
+    [HttpPut]
+    public Task<List<Case>> CreateRandom([FromQuery]int amount = 1)
+    {
+        return caseService.CreateRandomCase(amount);
     }
 }

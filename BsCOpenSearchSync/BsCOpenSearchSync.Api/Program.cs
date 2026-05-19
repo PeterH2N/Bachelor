@@ -1,8 +1,10 @@
+using System.Text;
 using BsCOpenSearchSync.Business.Services;
 using BsCOpenSearchSync.DataAccess.Store;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using OpenSearch.Net;
+using Serilog;
 using CaseDbContext =  BsCCaseApi.DataAccess.Store.AppDbContext;
 
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", false);
@@ -19,18 +21,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CaseDbContext>();
 builder.Services.AddDbContext<EventDbContext>();
+builder.Services.AddScoped<IStatsService, StatsService>();
 builder.Services.AddScoped<IOpenSearchLowLevelClient>(serviceProvider =>
 {
     var nodeAddress = new Uri(builder.Configuration["OpenSearch:BaseUrl"]!);
     var user = Environment.GetEnvironmentVariable("OPENSEARCH_USER");
     var pass = Environment.GetEnvironmentVariable("OPENSEARCH_PASS");
-    //var logger = serviceProvider.GetRequiredService<ILogger<OpenSearchLowLevelClient>>();
+    var logger = serviceProvider.GetRequiredService<ILogger<OpenSearchLowLevelClient>>();
     var settings = new ConnectionConfiguration(nodeAddress)
         .BasicAuthentication(user, pass)
         .RequestTimeout(TimeSpan.FromMinutes(5))
         .ServerCertificateValidationCallback((o, cert, chain, errors) => true);
-    //logger.LogDebug("Connecting to URI: {URI}", nodeAddress);
-    //logger.LogDebug("Connecting as user: {User}, {Pass}", user, pass);
     return new OpenSearchLowLevelClient(settings);
 });
 builder.Services.AddScoped<ISyncService, SyncService>(serviceProvider =>
@@ -45,13 +46,41 @@ builder.Services.AddScoped<ISyncService, SyncService>(serviceProvider =>
 
 builder.Services.AddControllers();
 
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
+
 var app = builder.Build();
+
+// Correlation from case api
+app.Use(async (context, next) =>
+{
+    var correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault() 
+                        ?? Guid.NewGuid().ToString();
+    
+    context.Items["CorrelationId"] = correlationId;
+    context.Response.Headers["X-Correlation-Id"] = correlationId;
+
+    using (Serilog.Context.LogContext.PushProperty("CorrelationId", correlationId))
+    {
+        await next();
+    }
+});
+
+app.UseSerilogRequestLogging();
+
 app.MapControllers();
 
 // Migrate event database
 using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<EventDbContext>();
-context.Database.Migrate(); // applies migrations
+await context.Database.MigrateAsync(); // applies migrations
+
+// do Sync on startup
+var syncService = scope.ServiceProvider.GetRequiredService<ISyncService>();
+await syncService.DoAllSyncs();
+
+// Health check
+app.MapGet("/health", () => Results.Ok());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -61,8 +90,13 @@ if (app.Environment.IsDevelopment())
     
     app.MapOpenApi();
 }
-
-app.UseHttpsRedirection();
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.Run();
+
+
+
 

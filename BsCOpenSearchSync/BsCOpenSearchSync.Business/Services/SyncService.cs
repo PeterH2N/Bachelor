@@ -8,7 +8,7 @@ using OpenSearch.Net;
 
 namespace BsCOpenSearchSync.Business.Services;
 
-public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOpenSearchLowLevelClient openSearchClient, ILogger<SyncService> logger) : ISyncService
+public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOpenSearchLowLevelClient openSearchClient, ILogger<SyncService> elogger) : ISyncService
 {
     private readonly JsonProcessor _jsonProcessor = new JsonProcessor(dbContext);
 
@@ -22,24 +22,13 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
         return await eventDbContext.SyncEvents.ToListAsync();
     }
 
-    public async Task<string> DoSync(int eventId)
-    {
-        var syncEvent = await eventDbContext.SyncEvents.FindAsync(eventId);
-
-        if (syncEvent is null)
-        {
-            throw new Exception("Sync event not found");
-        }
-        if (syncEvent.Status is not SyncStatus.Waiting)
-        {
-            throw new Exception($"Sync status is {nameof(SyncStatus.Waiting)}");
-        }
-        
-        return _jsonProcessor.JsonBulkFromId(syncEvent.Type, syncEvent.ObjectId, syncEvent.TableName);
-    }
-
     public async Task DoAllSyncs()
     {
+        // early exit if no events are waiting
+        if (!await eventDbContext.SyncEvents.AnyAsync(se => se.Status == SyncStatus.Waiting))
+        {
+            return;
+        }
         // wait for other threads to process the events
         await WaitForEventsAsync();
         
@@ -53,10 +42,10 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
             .Where(se => se.Status == SyncStatus.Syncing)
             .OrderBy(e => e.Id)
             .ToListAsync();
-
+        
+        // early exit if we claimed no events
         if (eventList.Count == 0)
         {
-            logger.LogInformation("No events found");
             return;
         }
         
@@ -67,12 +56,13 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
         
         if (!bulkResponse.Success)
         {
-            logger.LogError(bulkResponse.OriginalException, "Bulk request failed");
+            // set events status to waiting
+            await eventDbContext.SyncEvents
+                .Where(se => se.Status == SyncStatus.Syncing)
+                .ExecuteUpdateAsync(s => s.SetProperty(e => e.Status, SyncStatus.Waiting));
+
             throw new Exception("Bulk response failed");
         }
-
-        // Also check for partial failures in the body
-        logger.LogDebug("Bulk response: {Body}", bulkResponse.Body);
         
         // update event status
         await eventDbContext.SyncEvents

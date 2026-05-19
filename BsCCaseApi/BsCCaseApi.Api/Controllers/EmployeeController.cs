@@ -7,7 +7,7 @@ namespace BsCCaseApi.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class EmployeeController(IEmployeeService employeeService)
+public class EmployeeController(IEmployeeService employeeService) : ControllerBase
 {
     [HttpGet]
     public Task<List<Employee>> GetAll()
@@ -28,10 +28,16 @@ public class EmployeeController(IEmployeeService employeeService)
     }
 
     [HttpPatch("{employeeId:guid}")]
-    public Task<Employee> Update([FromBody] EmployeeDto employee, Guid employeeId)
+    public Task<Employee?> Update([FromBody] EmployeeDto employee, Guid employeeId)
     {
         var employeeToUpdate = employee.ToEmployee();
         employeeToUpdate.Id = employeeId;
         return employeeService.UpdateEmployee(employeeToUpdate);
+    }
+    
+    [HttpPut]
+    public Task<List<Employee>> CreateRandom([FromQuery]int amount = 1)
+    {
+        return employeeService.CreateRandomEmployee(amount);
     }
 }

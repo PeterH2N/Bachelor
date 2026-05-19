@@ -18,8 +18,49 @@ public class JsonProcessor(DbContext dbContext)
         
         return bulkJson;
     }
+    public static bool JsonEqual(JsonElement a, JsonElement b)
+    {
+        if (a.ValueKind != b.ValueKind) return false;
+
+        switch (a.ValueKind)
+        {
+            case JsonValueKind.Object:
+                var aProps = a.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
+                var bProps = b.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
+
+                if (aProps.Count != bProps.Count) return false;
+
+                return aProps.All(kvp =>
+                    bProps.TryGetValue(kvp.Key, out var bVal) && JsonEqual(kvp.Value, bVal));
+
+            case JsonValueKind.Array:
+                var aArr = a.EnumerateArray().ToList();
+                var bArr = b.EnumerateArray().ToList();
+
+                if (aArr.Count != bArr.Count) return false;
+
+                return aArr.Zip(bArr).All(pair => JsonEqual(pair.First, pair.Second));
+
+            case JsonValueKind.String:
+                return a.GetString() == b.GetString();
+
+            case JsonValueKind.Number:
+                return a.GetDecimal() == b.GetDecimal();
+
+            case JsonValueKind.True:
+            case JsonValueKind.False:
+                return a.GetBoolean() == b.GetBoolean();
+
+            case JsonValueKind.Null:
+            case JsonValueKind.Undefined:
+                return true;
+
+            default:
+                return false;
+        }
+    }
     
-    public string JsonBulkFromId(SyncType syncType, Guid id, string tableName)
+    private string JsonBulkFromId(SyncType syncType, Guid id, string tableName)
     {
         var type = FindEntityTypeForTable(tableName);
         if (type is null)
@@ -74,7 +115,7 @@ public class JsonProcessor(DbContext dbContext)
             EF.Property<object>(e, keyProperty.Name).Equals(id));
     }
 
-    private string GetActionLine(SyncType type, string index, Guid id)
+    private static string GetActionLine(SyncType type, string index, Guid id)
     {
         return $"{{ \"{type.ToString().ToLowerInvariant()}\": {{\"_index\": \"{index.ToLowerInvariant()}\", \"_id\": \"{id}\" }} }}";
     }

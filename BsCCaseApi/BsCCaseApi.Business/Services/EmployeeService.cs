@@ -1,3 +1,4 @@
+using BsCCaseApi.Business.Helpers;
 using BsCCaseApi.DataAccess.Store;
 using BsCCaseApi.Domain.Models;
 using BsCOpenSearchSync.Client;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BsCCaseApi.Business.Services;
 
-public class EmployeeService(AppDbContext dbContext, ISyncEventService syncEventService) : IEmployeeService
+public class EmployeeService(AppDbContext dbContext, ISyncEventService syncEventService, IModelFaker modelFaker) : IEmployeeService
 {
     public async Task<List<Employee>> GetAllEmployees()
     {
@@ -24,8 +25,18 @@ public class EmployeeService(AppDbContext dbContext, ISyncEventService syncEvent
         await syncEventService.DoOperation<Employee>(SyncType.Create, employee);
     }
 
-    public async Task<Employee> UpdateEmployee(Employee employee)
+    public async Task<Employee?> UpdateEmployee(Employee employee)
     {
         return await syncEventService.DoOperation<Employee>(SyncType.Update, employee);
+    }
+
+    public async Task<List<Employee>> CreateRandomEmployee(int amount)
+    {
+        var newEmployees = modelFaker.RandomEmployee(amount);
+        foreach (var newEmployee in newEmployees)
+        {
+            await syncEventService.DoOperation<Employee>(SyncType.Create, newEmployee);
+        }
+        return newEmployees;
     }
 }
