@@ -14,8 +14,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BsCCaseApi.Domain" Version="1.2.32" />
-      <PackageReference Include="bscopensearchsync.client" Version="1.2.32" />
+      <PackageReference Include="BsCCaseApi.Domain" Version="1.2.33" />
+      <PackageReference Include="bscopensearchsync.client" Version="1.2.33" />
     </ItemGroup>
 
 </Project>
