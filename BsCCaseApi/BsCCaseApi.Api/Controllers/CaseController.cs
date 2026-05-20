@@ -28,7 +28,7 @@ public class CaseController(ICaseService caseService) : ControllerBase
         return caseService.CreateCase(@case.ToCase());
     }
 
-    [HttpPatch("{caseId:int}")]
+    [HttpPatch("{caseId:guid}")]
     public Task<Case> Update([FromBody] CaseDto @case, Guid caseId)
     {
         var caseToUpdate = @case.ToCase();

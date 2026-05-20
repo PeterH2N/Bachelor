@@ -1,0 +1,241 @@
+using System.Diagnostics;
+using System.Net;
+using System.Text;
+using System.Text.Json;
+using BsCTestSuite.Infrastructure;
+using Xunit.Abstractions;
+
+namespace BsCTestSuite.Tests;
+
+public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
+{
+    private static readonly TimeSpan TestDuration       = TimeSpan.FromMinutes(60);
+    private static readonly TimeSpan RequestInterval    = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan DesyncCheckInterval = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan RestartInterval    = TimeSpan.FromSeconds(30);
+    
+    private static readonly int IntervalJitterMs        = 5; // ± jitter on each interval
+    
+    private static readonly Random Rng = new();
+    
+    [Fact]
+    public async Task RunChaosTest()
+    {
+        using var cts = new CancellationTokenSource(TestDuration);
+        var ct = cts.Token;
+
+        int requestCount   = 0;
+        int desyncChecks   = 0;
+        int desyncCount    = 0;
+        int desyncDocs     = 0;
+        int restartCount   = 0;
+        int errorCount     = 0;
+
+        var tasks = new[]
+        {
+            SendRandomRequestsAsync(),
+            CheckForDesyncsAsync(),
+            RestartSyncServiceAsync()
+        };
+
+        try
+        {
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException)
+        {
+            // expected — test duration elapsed
+        }
+
+        var avg = (double)desyncDocs / desyncChecks;
+
+        output.WriteLine("─── Chaos Test Complete ───────────────────────");
+        output.WriteLine($"  Requests sent          : {requestCount}");
+        output.WriteLine($"  Desync checks          : {desyncChecks} checks, {desyncCount} desyncs found");
+        output.WriteLine($"  Average desynced docs  : {avg}");
+        output.WriteLine($"  Restarts               : {restartCount}");
+        output.WriteLine($"  Errors                 : {errorCount}");
+        output.WriteLine("───────────────────────────────────────────────");
+        
+        await Task.Delay(1000); // Give all syncs the chance to complete
+
+        Assert.Equal(0, await AmountOfDeltaDocs());
+
+        // ── Local task definitions ───────────────────────────────────────────
+
+        async Task SendRandomRequestsAsync()
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                try
+                {
+                    SendRandomMainApiRequestAsync(ct);
+                    Interlocked.Increment(ref requestCount);
+                }
+                catch (OperationCanceledException) { break; }
+                catch (Exception ex)
+                {
+                    Interlocked.Increment(ref errorCount);
+                    output.WriteLine($"[Request error] {ex.Message}");
+                }
+
+                await DelayWithJitter(RequestInterval, ct);
+            }
+        }
+
+        async Task CheckForDesyncsAsync()
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                await DelayWithJitter(DesyncCheckInterval, ct);
+
+                try
+                {
+                    var response = await fixture.SyncClient.GetAsync("api/Stats/GetDelta", ct);
+                    var json     = await response.Content.ReadAsStringAsync(ct);
+                    
+                    var delta = JsonSerializer.Deserialize<Dictionary<string, IEnumerable<Tuple<string, Guid>>>>(json);
+        
+                    var count = delta.Aggregate(0, (acc, x) => acc + x.Value.Count());
+
+                    Interlocked.Increment(ref desyncChecks);
+
+                    if (!response.IsSuccessStatusCode || count > 0)
+                    {
+                        Interlocked.Add(ref desyncDocs, count);
+                        Interlocked.Increment(ref desyncCount);
+                        output.WriteLine($"[Desync detected] HTTP {(int)response.StatusCode}: {json}");
+                    }
+                    else
+                    {
+                        output.WriteLine($"[Desync check] OK");
+                    }
+                }
+                catch (OperationCanceledException) { break; }
+                catch (Exception ex)
+                {
+                    Interlocked.Increment(ref errorCount);
+                    output.WriteLine($"[Desync check error] {ex.Message}");
+                }
+            }
+        }
+
+        async Task RestartSyncServiceAsync()
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                await DelayWithJitter(RestartInterval, ct);
+
+                try
+                {
+                    await ShutdownAndRestartSyncApiAsync(ct);
+                    Interlocked.Increment(ref restartCount);
+                    output.WriteLine($"[Restart] Sync service restarted");
+                }
+                catch (OperationCanceledException) { break; }
+                catch (Exception ex)
+                {
+                    Interlocked.Increment(ref errorCount);
+                    output.WriteLine($"[Restart error] {ex.Message}");
+                }
+            }
+        }
+    }
+
+    // ── Replace this with your actual request logic ──────────────────────────
+    private async Task SendRandomMainApiRequestAsync(CancellationToken ct)
+    {
+        // Randomly pick between entity types and operations as needed
+        var endpoints = new[]
+        {
+            "/api/Case/CreateRandom",
+            "/api/Car/CreateRandom",
+            "/api/Customer/CreateRandom",
+            "/api/Employee/CreateRandom",
+        };
+
+        var path = endpoints[Rng.Next(endpoints.Length)];
+
+        await fixture.CaseClient.PutAsync(path, null, ct);
+    }
+
+    // ── Replace with your actual shutdown/restart logic ───────────────────────
+    private async Task ShutdownAndRestartSyncApiAsync(CancellationToken ct)
+    {
+        await fixture.SyncClient.PostAsync("api/Test/SimulateShutdown", null, ct);
+        await Task.Delay(1000, ct);
+        
+        var solutionDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var projectPath = Path.Combine(solutionDir, "BsCOpenSearchSync", "BsCOpenSearchSync.Api", "BsCOpenSearchSync.Api.csproj");
+        
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = $"run --project {projectPath}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            }
+        };
+
+        process.OutputDataReceived += (sender, e) =>
+        {
+            if (e.Data != null)
+                Console.WriteLine($"[SYNC] {e.Data}");
+        };
+
+        process.ErrorDataReceived += (sender, e) =>
+        {
+            if (e.Data != null)
+                Console.WriteLine($"[SYNC ERR] {e.Data}");
+        };
+
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+    
+        // wait for it to be responsive again
+        await WaitForApi(fixture.SyncClient);
+    }
+
+    private static async Task WaitForApi(HttpClient client, int timeoutSeconds = 30)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                var response = await client.GetAsync("/health");
+                if (response.IsSuccessStatusCode)
+                    return;
+            }
+            catch { /* not up yet */ }
+        
+            await Task.Delay(500);
+        }
+    
+        throw new TimeoutException("Sync API did not restart in time");
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    private static Task DelayWithJitter(TimeSpan baseDelay, CancellationToken ct)
+    {
+        var jitter   = Rng.Next(-IntervalJitterMs, IntervalJitterMs);
+        var actual   = baseDelay + TimeSpan.FromMilliseconds(jitter);
+        var clamped  = TimeSpan.FromMilliseconds(Math.Max(50, actual.TotalMilliseconds));
+        return Task.Delay(clamped, ct);
+    }
+    
+    private async Task<int> AmountOfDeltaDocs()
+    {
+        var deltaRes = await fixture.SyncClient.GetAsync("api/Stats/GetDelta");
+
+        var json = await deltaRes.Content.ReadAsStringAsync();
+        var delta = JsonSerializer.Deserialize<Dictionary<string, IEnumerable<Tuple<string, Guid>>>>(json);
+        
+        return delta.Aggregate(0, (acc, x) => acc + x.Value.Count());
+    }
+    
+}

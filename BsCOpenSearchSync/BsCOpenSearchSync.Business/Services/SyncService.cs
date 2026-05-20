@@ -66,7 +66,7 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
                 .Where(se => se.Status == SyncStatus.Syncing)
                 .ExecuteUpdateAsync(s => s.SetProperty(e => e.Status, SyncStatus.Processed));
         }
-        catch (Exception ex)
+        catch 
         {
             // set events status to waiting
             await eventDbContext.SyncEvents

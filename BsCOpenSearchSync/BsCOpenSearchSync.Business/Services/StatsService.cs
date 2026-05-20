@@ -1,14 +1,12 @@
 using System.Text.Json;
-using BsCCaseApi.DataAccess.Store;
 using BsCOpenSearchSync.Business.Helpers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using OpenSearch.Net;
 using HttpMethod = OpenSearch.Net.HttpMethod;
 
 namespace BsCOpenSearchSync.Business.Services;
 
-public class StatsService(IOpenSearchLowLevelClient openSearchClient, AppDbContext dbContext) : IStatsService
+public class StatsService(IOpenSearchLowLevelClient openSearchClient, DbContext dbContext) : IStatsService
 {
     public async Task<string> GetCount(string index)
     {
@@ -30,7 +28,7 @@ public class StatsService(IOpenSearchLowLevelClient openSearchClient, AppDbConte
 
         foreach (var entityType in entityTypes)
         {
-            sets[entityType] = GetWithRelationships(entityType);
+            sets[entityType] = JsonProcessor.GetWithRelationships(entityType, dbContext);
         }
 
         foreach (var (entityType, set) in sets)
@@ -77,69 +75,23 @@ public class StatsService(IOpenSearchLowLevelClient openSearchClient, AppDbConte
         foreach (var obj in set)
         {
             var id = entityType.GetProperty("Id")?.GetValue(obj)?.ToString();
+            var guid = Guid.Parse(id);
+            // remove id to track any ids that should be removed from OpenSearch
+            ids.Remove(guid);
             
             var source = sources.FirstOrDefault(s => s.GetProperty("Id").ToString() == id);
-
+            
             var objElem = JsonSerializer.SerializeToElement(obj);
-
-            var guid = Guid.Parse(id);
             
             if (!JsonProcessor.JsonEqual(source, objElem))
             {
                 deltaList.Add(new Tuple<string, Guid>("Index", guid));
             }
-            else
-            {
-                // remove, to track if there are documents in OpenSearch that should be removed
-                ids.Remove(guid);
-            }
+            
         }
         
         deltaList.AddRange(ids.Select(id => new Tuple<string, Guid>("Delete", id)));
 
         return deltaList;
-    }
-
-    private IQueryable GetWithRelationships(Type entityType)
-    {
-        var set = (IQueryable)dbContext.GetType()
-            .GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!
-            .MakeGenericMethod(entityType)
-            .Invoke(dbContext, null)!;
-
-        var entityMeta = dbContext.Model.FindEntityType(entityType)!;
-
-        foreach (var path in GetIncludePaths(entityMeta))
-        {
-            set = EntityFrameworkQueryableExtensions.Include(
-                (IQueryable<object>)set,
-                path
-            );
-        }
-
-        return set;
-    }
-
-    private static IEnumerable<string> GetIncludePaths(IEntityType entityType, string prefix = "", int maxDepth = 3, HashSet<IEntityType>? visited = null)
-    {
-        visited ??= new HashSet<IEntityType>();
-    
-        if (maxDepth == 0) yield break;
-        if (!visited.Add(entityType)) yield break; // already visiting this type, skip to avoid cycles
-
-        foreach (var navigation in entityType.GetNavigations())
-        {
-            var path = string.IsNullOrEmpty(prefix)
-                ? navigation.Name
-                : $"{prefix}.{navigation.Name}";
-
-            yield return path;
-
-            var targetType = navigation.TargetEntityType;
-            foreach (var nestedPath in GetIncludePaths(targetType, path, maxDepth - 1, visited))
-                yield return nestedPath;
-        }
-    
-        visited.Remove(entityType); // remove so it can be visited on other branches
     }
 }

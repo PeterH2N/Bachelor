@@ -24,7 +24,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CaseDbContext>();
 builder.Services.AddDbContext<EventDbContext>();
-builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IStatsService, StatsService>(serviceProvider =>
+{
+    var caseDbContext = serviceProvider.GetRequiredService<CaseDbContext>();
+    var openSearchClient = serviceProvider.GetRequiredService<IOpenSearchLowLevelClient>();
+    return new StatsService(openSearchClient, caseDbContext);
+});
 builder.Services.AddScoped<IOpenSearchLowLevelClient>(_ =>
 {
     var nodeAddress = new Uri(builder.Configuration["OpenSearch:BaseUrl"]!);

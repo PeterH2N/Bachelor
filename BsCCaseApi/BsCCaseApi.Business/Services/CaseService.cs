@@ -14,6 +14,7 @@ public class CaseService(AppDbContext dbContext, ISyncEventService syncEventServ
         return await dbContext.Cases
             .Include(c => c.Customer)
             .Include(c => c.Car)
+            .ThenInclude(c => c.Customer)
             .Include(c=> c.Employee)
             .ToListAsync();
     }
@@ -22,6 +23,7 @@ public class CaseService(AppDbContext dbContext, ISyncEventService syncEventServ
         var @case = await dbContext.Cases
             .Include(c => c.Customer)
             .Include(c => c.Car)
+            .ThenInclude(c => c.Customer)
             .Include(c=> c.Employee)
             .FirstOrDefaultAsync(c => c.Id == caseId);
         return @case ?? throw new Exception("Case not found");
