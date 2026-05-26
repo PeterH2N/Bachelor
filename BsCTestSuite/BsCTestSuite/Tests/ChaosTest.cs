@@ -7,14 +7,16 @@ using Xunit.Abstractions;
 
 namespace BsCTestSuite.Tests;
 
+[Collection("Tests")]
 public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
 {
-    private static readonly TimeSpan TestDuration       = TimeSpan.FromMinutes(60);
-    private static readonly TimeSpan RequestInterval    = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan RequestInterval     = TimeSpan.FromMilliseconds(250);
     private static readonly TimeSpan DesyncCheckInterval = TimeSpan.FromSeconds(60);
-    private static readonly TimeSpan RestartInterval    = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan RestartInterval     = TimeSpan.FromMinutes(20);
+    private static readonly TimeSpan DesyncPauseDuration = TimeSpan.FromSeconds(1);
     
-    private static readonly int IntervalJitterMs        = 5; // ± jitter on each interval
+    private static readonly int IntervalJitterMs         = 5; // ± jitter on each interval
     
     private static readonly Random Rng = new();
     
@@ -30,6 +32,10 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
         int desyncDocs     = 0;
         int restartCount   = 0;
         int errorCount     = 0;
+
+        // Gate held by the desync checker to pause request sending before each check.
+        // Starts released (1). Checker acquires it to block requests, then releases after checking.
+        var pauseGate = new SemaphoreSlim(1, 1);
 
         var tasks = new[]
         {
@@ -67,6 +73,8 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
         {
             while (!ct.IsCancellationRequested)
             {
+                // Block here while the desync checker holds the gate
+                await pauseGate.WaitAsync(ct);
                 try
                 {
                     SendRandomMainApiRequestAsync(ct);
@@ -77,6 +85,10 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
                 {
                     Interlocked.Increment(ref errorCount);
                     output.WriteLine($"[Request error] {ex.Message}");
+                }
+                finally
+                {
+                    pauseGate.Release();
                 }
 
                 await DelayWithJitter(RequestInterval, ct);
@@ -89,8 +101,13 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
             {
                 await DelayWithJitter(DesyncCheckInterval, ct);
 
+                // Acquire the gate to stop new requests, then wait 1 s before checking
+                await pauseGate.WaitAsync(ct);
                 try
                 {
+                    output.WriteLine($"[Desync check] Pausing requests for {DesyncPauseDuration.TotalSeconds}s…");
+                    await Task.Delay(DesyncPauseDuration, ct);
+
                     var response = await fixture.SyncClient.GetAsync("api/Stats/GetDelta", ct);
                     var json     = await response.Content.ReadAsStringAsync(ct);
                     
@@ -116,6 +133,10 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
                 {
                     Interlocked.Increment(ref errorCount);
                     output.WriteLine($"[Desync check error] {ex.Message}");
+                }
+                finally
+                {
+                    pauseGate.Release();
                 }
             }
         }

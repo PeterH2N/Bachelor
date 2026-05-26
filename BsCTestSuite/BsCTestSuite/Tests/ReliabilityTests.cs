@@ -5,6 +5,7 @@ using BsCTestSuite.Infrastructure;
 
 namespace BsCTestSuite.Tests;
 
+[Collection("Tests")]
 public class ReliabilityTests(TestFixture fixture) : IClassFixture<TestFixture>
 {
     // check count of a certain index, after adding 100 requests, the count should be 100 higher

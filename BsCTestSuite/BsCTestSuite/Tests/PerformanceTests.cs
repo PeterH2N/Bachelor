@@ -2,6 +2,7 @@ using BsCTestSuite.Infrastructure;
 
 namespace BsCTestSuite.Tests;
 
+[Collection("Tests")]
 public class PerformanceTests(TestFixture fixture) : IClassFixture<TestFixture>
 {
     [Fact]
