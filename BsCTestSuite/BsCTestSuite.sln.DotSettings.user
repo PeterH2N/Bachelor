@@ -8,11 +8,4 @@
     &lt;TestId&gt;xUnit::42CCEB0A-691B-498A-895D-6D78F1745965::net10.0::BsCTestSuite.Tests.ChaosTest&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fdb39919_002Db07f_002D4ed2_002Dbdce_002D2b2d4dc8cd64/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="RequestsShouldCompleteWithin2Seconds" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::42CCEB0A-691B-498A-895D-6D78F1745965::net10.0::BsCTestSuite.Tests.PerformanceTests.RequestsShouldCompleteWithin2Seconds&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::42CCEB0A-691B-498A-895D-6D78F1745965::net10.0::BsCTestSuite.Tests.ReliabilityTests.NoRequestsShouldBeDroppedUnder100ConcurrentRequests&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::42CCEB0A-691B-498A-895D-6D78F1745965::net10.0::BsCTestSuite.Tests.ReliabilityTests.CaseApi_ShouldHandleSyncApiDown&lt;/TestId&gt;
-    &lt;TestId&gt;xUnit::42CCEB0A-691B-498A-895D-6D78F1745965::net10.0::BsCTestSuite.Tests.ReliabilityTests.NoRequestsShouldBeDroppedUnder500ConcurrentRequests&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+	</wpf:ResourceDictionary>
