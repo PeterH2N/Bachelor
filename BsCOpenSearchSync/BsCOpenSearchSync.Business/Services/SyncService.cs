@@ -8,7 +8,7 @@ using OpenSearch.Net;
 
 namespace BsCOpenSearchSync.Business.Services;
 
-public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOpenSearchLowLevelClient openSearchClient, ILogger<SyncService> elogger) : ISyncService
+public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOpenSearchLowLevelClient openSearchClient, ILogger<SyncService> logger) : ISyncService
 {
     private readonly JsonProcessor _jsonProcessor = new JsonProcessor(dbContext);
 

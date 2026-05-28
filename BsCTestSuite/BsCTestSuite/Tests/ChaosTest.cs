@@ -10,13 +10,14 @@ namespace BsCTestSuite.Tests;
 [Collection("Tests")]
 public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
 {
-    private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(60);
     private static readonly TimeSpan RequestInterval     = TimeSpan.FromMilliseconds(250);
     private static readonly TimeSpan DesyncCheckInterval = TimeSpan.FromSeconds(60);
-    private static readonly TimeSpan RestartInterval     = TimeSpan.FromMinutes(20);
+    private static readonly TimeSpan RestartInterval     = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan DesyncPauseDuration = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan RestartDuration      = TimeSpan.FromSeconds(10);
     
-    private static readonly int IntervalJitterMs         = 5; // ± jitter on each interval
+    private static readonly int IntervalJitterMs         = 0; // ± jitter on each interval
     
     private static readonly Random Rng = new();
     
@@ -36,6 +37,7 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
         // Gate held by the desync checker to pause request sending before each check.
         // Starts released (1). Checker acquires it to block requests, then releases after checking.
         var pauseGate = new SemaphoreSlim(1, 1);
+        var restartGate = new SemaphoreSlim(1, 1);
 
         var tasks = new[]
         {
@@ -75,6 +77,7 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
             {
                 // Block here while the desync checker holds the gate
                 await pauseGate.WaitAsync(ct);
+                await restartGate.WaitAsync(ct);
                 try
                 {
                     SendRandomMainApiRequestAsync(ct);
@@ -89,6 +92,7 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
                 finally
                 {
                     pauseGate.Release();
+                    restartGate.Release();
                 }
 
                 await DelayWithJitter(RequestInterval, ct);
@@ -146,18 +150,26 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
             while (!ct.IsCancellationRequested)
             {
                 await DelayWithJitter(RestartInterval, ct);
-
+                await restartGate.WaitAsync(ct);
                 try
                 {
+                    output.WriteLine($"[Restart] Shutting down Sync Service for {RestartDuration.TotalSeconds} seconds");
                     await ShutdownAndRestartSyncApiAsync(ct);
                     Interlocked.Increment(ref restartCount);
                     output.WriteLine($"[Restart] Sync service restarted");
                 }
-                catch (OperationCanceledException) { break; }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
                 catch (Exception ex)
                 {
                     Interlocked.Increment(ref errorCount);
                     output.WriteLine($"[Restart error] {ex.Message}");
+                }
+                finally
+                {
+                    restartGate.Release();
                 }
             }
         }
@@ -184,7 +196,7 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
     private async Task ShutdownAndRestartSyncApiAsync(CancellationToken ct)
     {
         await fixture.SyncClient.PostAsync("api/Test/SimulateShutdown", null, ct);
-        await Task.Delay(1000, ct);
+        await Task.Delay(RestartDuration, ct);
         
         var solutionDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var projectPath = Path.Combine(solutionDir, "BsCOpenSearchSync", "BsCOpenSearchSync.Api", "BsCOpenSearchSync.Api.csproj");

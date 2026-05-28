@@ -6,6 +6,5 @@ namespace BsCOpenSearchSync.Client;
 
 public interface ISyncEventService
 {
-    public Task AddSyncEvent(SyncEvent syncEvent);
     public Task<T?> DoOperation<T>(SyncType type, object obj) where T : class, IHasId;
 }

@@ -48,10 +48,6 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         CallSyncEndpoint();
         return returnObject;
     }
-    public async Task AddSyncEvent(SyncEvent syncEvent)
-    {
-        await dbContext.SaveChangesAsync();
-    }
 
     private async Task<T> Create<T>(object obj) where T : class, IHasId
     {
