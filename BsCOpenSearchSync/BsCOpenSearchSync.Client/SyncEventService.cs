@@ -55,13 +55,14 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync();
 
+        var connection = dbContext.Database.GetDbConnection();
+        eventDbContext.Database.SetDbConnection(connection);
+        await eventDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
         try
         {
-            await eventDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
-
-            await eventDbContext.SaveChangesAsync();
             await dbContext.SaveChangesAsync();
-
+            await eventDbContext.SaveChangesAsync();
             await transaction.CommitAsync();
         }
         catch

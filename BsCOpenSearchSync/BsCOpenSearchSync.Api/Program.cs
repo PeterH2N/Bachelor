@@ -24,18 +24,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<CaseDbContext>(optionsBuilder =>
+builder.Services.AddDbContext<CaseDbContext>(options =>
 {
-    optionsBuilder.UseSqlServer(
-            connectionString
-        )
+    options.UseSqlServer(connectionString)
         .ConfigureWarnings(w => w.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
 });
-builder.Services.AddDbContext<EventDbContext>((provider, options) =>
+builder.Services.AddDbContext<EventDbContext>(options =>
 {
-    var appDb = provider.GetRequiredService<CaseDbContext>();
-    var connection = appDb.Database.GetDbConnection();
-    options.UseSqlServer(connection);
+    options.UseSqlServer(connectionString);
 });
 
 builder.Services.AddScoped<IStatsService, StatsService>(serviceProvider =>
