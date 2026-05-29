@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BsCOpenSearchSync.DataAccess.Store;
 
-public class EventDbContext : DbContext
+public class EventDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<SyncEvent>  SyncEvents { get; set; }
     
