@@ -1,4 +1,5 @@
 using BsCCaseApi.Domain.Interfaces;
+using BsCOpenSearchSync.Business.Helpers;
 using BsCOpenSearchSync.DataAccess.Store;
 using BsCOpenSearchSync.Domain.Enums;
 using BsCOpenSearchSync.Domain.Models.Events;
@@ -134,12 +135,12 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
             var pkPropertyName = dependentType.FindPrimaryKey()!.Properties[0].Name;
             var tableName = dependentType.GetTableName()!;
 
-            // find all dependent entities where FK matches the changed entity's PK
-            var dependentEntities = dbContext.Set<object>()
+            var set = JsonProcessor.GetWithRelationships(dependentType.ClrType, dbContext);
+
+            var dependentEntities = set
                 .Cast<object>()
                 .AsEnumerable()
-                .Where(e => e.GetType() == dependentType.ClrType &&
-                            e.GetType().GetProperty(fkPropertyName)?.GetValue(e)?.Equals(changedId) == true);
+                .Where(e => e.GetType().GetProperty(fkPropertyName)?.GetValue(e)?.Equals(changedId) == true);
 
             foreach (var dependent in dependentEntities)
             {
