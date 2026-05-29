@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="bsccaseapi.dataaccess" Version="1.2.44" />
+        <PackageReference Include="bsccaseapi.dataaccess" Version="1.2.45" />
         <PackageReference Include="DotNetEnv" Version="3.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
         <PackageReference Include="Quartz.AspNetCore" Version="3.18.1" />
