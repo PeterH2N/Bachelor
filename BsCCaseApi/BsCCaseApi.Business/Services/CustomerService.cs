@@ -39,4 +39,18 @@ public class CustomerService(AppDbContext dbContext, ISyncEventService syncEvent
         }
         return newCustomers;
     }
+    
+    public async Task<Customer> UpdateRandomCustomer()
+    {
+        var updatedCustomer = modelFaker.RandomCustomer(1).First();
+        // get random id
+        var randomId = await dbContext.Set<Customer>()
+            .OrderBy(e => EF.Functions.Random())
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync();
+        updatedCustomer.Id = randomId;
+        
+        await syncEventService.DoOperation<Customer>(SyncType.Update, updatedCustomer);
+        return updatedCustomer;
+    }
 }

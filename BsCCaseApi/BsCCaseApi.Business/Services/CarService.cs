@@ -40,4 +40,18 @@ public class CarService(AppDbContext dbContext, ISyncEventService syncEventServi
         
         return newCars;
     } 
+    
+    public async Task<Car> UpdateRandomCar()
+    {
+        var updatedCar = modelFaker.RandomCar(1).First();
+        // get random id
+        var randomId = await dbContext.Set<Car>()
+            .OrderBy(e => EF.Functions.Random())
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync();
+        updatedCar.Id = randomId;
+        
+        await syncEventService.DoOperation<Car>(SyncType.Update, updatedCar);
+        return updatedCar;
+    }
 }

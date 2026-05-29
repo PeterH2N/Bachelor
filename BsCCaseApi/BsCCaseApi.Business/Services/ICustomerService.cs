@@ -9,4 +9,5 @@ public interface ICustomerService
     public Task CreateCustomer(Customer customer);
     public Task<Customer> UpdateCustomer(Customer customer);
     public Task<List<Customer>> CreateRandomCustomer(int amount);
+    public Task<Customer> UpdateRandomCustomer();
 }

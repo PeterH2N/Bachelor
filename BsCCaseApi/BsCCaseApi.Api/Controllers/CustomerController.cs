@@ -40,4 +40,10 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
     {
         return customerService.CreateRandomCustomer(amount);
     }
+    
+    [HttpPatch]
+    public Task<Customer> UpdateRandom()
+    {
+        return customerService.UpdateRandomCustomer();
+    }
 }

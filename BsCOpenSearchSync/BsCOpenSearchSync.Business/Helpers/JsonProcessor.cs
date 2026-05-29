@@ -139,6 +139,10 @@ public class JsonProcessor(DbContext dbContext)
         }
 
         var resJson = JsonSerializer.Serialize(result);
+        if (syncType == SyncType.Update)
+        {
+            resJson = $"{{ \"doc\": {resJson} }}";
+        }
 
         return actionLine + "\n" + resJson;
     }

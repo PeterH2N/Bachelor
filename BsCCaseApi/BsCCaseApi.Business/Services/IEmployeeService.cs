@@ -9,5 +9,6 @@ public interface IEmployeeService
     public Task CreateEmployee(Employee employee);
     public Task<Employee?> UpdateEmployee(Employee employee);
     public Task<List<Employee>> CreateRandomEmployee(int amount);
+    public Task<Employee> UpdateRandomEmployee();
 
 }

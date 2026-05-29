@@ -9,5 +9,6 @@ public interface ICarService
     public Task CreateCar(Car car);
     public Task<Car?> UpdateCar(Car car);
     public Task<List<Car>> CreateRandomCar(int amount);
+    public Task<Car> UpdateRandomCar();
 
 }

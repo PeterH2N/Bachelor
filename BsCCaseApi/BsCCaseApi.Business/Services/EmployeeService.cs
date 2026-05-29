@@ -39,4 +39,18 @@ public class EmployeeService(AppDbContext dbContext, ISyncEventService syncEvent
         }
         return newEmployees;
     }
+    
+    public async Task<Employee> UpdateRandomEmployee()
+    {
+        var updatedEmployee = modelFaker.RandomEmployee(1).First();
+        // get random id
+        var randomId = await dbContext.Set<Employee>()
+            .OrderBy(e => EF.Functions.Random())
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync();
+        updatedEmployee.Id = randomId;
+        
+        await syncEventService.DoOperation<Employee>(SyncType.Update, updatedEmployee);
+        return updatedEmployee;
+    }
 }

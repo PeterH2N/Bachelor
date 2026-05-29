@@ -53,4 +53,18 @@ public class CaseService(AppDbContext dbContext, ISyncEventService syncEventServ
         }
         return newCases;
     }
+
+    public async Task<Case> UpdateRandomCase()
+    {
+        var updatedCase = modelFaker.RandomCase(1).First();
+        // get random id
+        var randomId = await dbContext.Set<Case>()
+            .OrderBy(e => EF.Functions.Random())
+            .Select(e => e.Id)
+            .FirstOrDefaultAsync();
+        updatedCase.Id = randomId;
+        
+        await syncEventService.DoOperation<Case>(SyncType.Update, updatedCase);
+        return updatedCase;
+    }
 }

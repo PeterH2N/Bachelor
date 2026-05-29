@@ -47,4 +47,10 @@ public class CaseController(ICaseService caseService) : ControllerBase
     {
         return caseService.CreateRandomCase(amount);
     }
+    
+    [HttpPatch]
+    public Task<Case> UpdateRandom()
+    {
+        return caseService.UpdateRandomCase();
+    }
 }

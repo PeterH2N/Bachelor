@@ -40,4 +40,10 @@ public class EmployeeController(IEmployeeService employeeService) : ControllerBa
     {
         return employeeService.CreateRandomEmployee(amount);
     }
+    
+    [HttpPatch]
+    public Task<Employee> UpdateRandom()
+    {
+        return employeeService.UpdateRandomEmployee();
+    }
 }

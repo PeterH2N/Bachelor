@@ -11,5 +11,5 @@ public interface ICaseService
     public Task DeleteCase(Guid caseId);
     public Task<Case> UpdateCase(Case @case);
     public Task<List<Case>> CreateRandomCase(int amount);
-
+    public Task<Case> UpdateRandomCase();
 }

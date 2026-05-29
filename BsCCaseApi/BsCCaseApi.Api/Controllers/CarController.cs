@@ -41,4 +41,10 @@ public class CarController(ICarService carService) : ControllerBase
     {
         return carService.CreateRandomCar(amount);
     }
+    
+    [HttpPatch]
+    public Task<Car> UpdateRandom()
+    {
+        return carService.UpdateRandomCar();
+    }
 }

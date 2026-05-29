@@ -14,7 +14,7 @@ public class PerformanceTests(TestFixture fixture, ITestOutputHelper output) : I
         var correlationId = response.Headers.GetValues("X-Correlation-Id").First();
 
         // wait for sync to complete
-        await Task.Delay(5000);
+        await Task.Delay(3000);
 
         var logs = fixture.LogsForCorrelationId(correlationId).ToList();
         var start = logs.Min(e => e.Timestamp);

@@ -60,7 +60,7 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
         
             if (!bulkResponse.Success)
             {
-                throw new Exception("Bulk operation failed");
+                throw new Exception($"Bulk operation failed: {bulkResponse.Body}");
             }
             // update event status
             await eventDbContext.SyncEvents
