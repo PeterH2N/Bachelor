@@ -45,7 +45,7 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         // cascade changes if update
         if (type == SyncType.Update)
         {
-            var cascadingEvents = GetCascadingSyncEvents(typeof(T), obj);
+            var cascadingEvents = GetCascadingSyncEvents(typeof(T), returnObject);
             cascadingEvents = cascadingEvents.DistinctBy(e => new { e.ObjectId, e.TableName });
             await eventDbContext.SyncEvents.AddRangeAsync(cascadingEvents);
         }
