@@ -10,12 +10,14 @@ namespace BsCTestSuite.Tests;
 [Collection("Tests")]
 public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
 {
-    private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(60);
-    private static readonly TimeSpan RequestInterval     = TimeSpan.FromMilliseconds(20);
+    private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(2);
+    private static readonly int RequestsPerMinute = 1000;
+    private static readonly TimeSpan RequestInterval = TimeSpan.FromMilliseconds(60_000.0 / RequestsPerMinute * 10);
     private static readonly TimeSpan DesyncCheckInterval = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan RestartInterval     = TimeSpan.FromMinutes(15);
-    private static readonly TimeSpan DesyncPauseDuration = TimeSpan.FromSeconds(1);
-    private static readonly TimeSpan RestartDuration      = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan DesyncPauseDuration = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan RestartDuration     = TimeSpan.FromSeconds(10);
+    private static readonly int UpdatesPerCreates = 4;
     
     private static readonly int IntervalJitterMs         = 0; // ± jitter on each interval
     
@@ -35,7 +37,6 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
         int errorCount     = 0;
 
         // Gate held by the desync checker to pause request sending before each check.
-        // Starts released (1). Checker acquires it to block requests, then releases after checking.
         var pauseGate = new SemaphoreSlim(1, 1);
         var restartGate = new SemaphoreSlim(1, 1);
 
@@ -69,25 +70,25 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
 
         Assert.Equal(0, await AmountOfDeltaDocs());
 
-        // ── Local task definitions ───────────────────────────────────────────
-
         async Task SendRandomRequestsAsync()
         {
             while (!ct.IsCancellationRequested)
             {
-                // Block here while the desync checker holds the gate
+                var sw = Stopwatch.StartNew();
+        
                 await pauseGate.WaitAsync(ct);
                 await restartGate.WaitAsync(ct);
                 try
                 {
-                    SendRandomMainApiRequestAsync(ct);
-                    Interlocked.Increment(ref requestCount);
-                }
-                catch (OperationCanceledException) { break; }
-                catch (Exception ex)
-                {
-                    Interlocked.Increment(ref errorCount);
-                    output.WriteLine($"[Request error] {ex.Message}");
+                    var concurrency = 10;
+                    await Parallel.ForEachAsync(
+                        Enumerable.Range(0, concurrency),
+                        new ParallelOptions { MaxDegreeOfParallelism = concurrency, CancellationToken = ct },
+                        async (_, token) =>
+                        {
+                            SendRandomMainApiRequestAsync(token);
+                            Interlocked.Increment(ref requestCount);
+                        });
                 }
                 finally
                 {
@@ -95,7 +96,11 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
                     restartGate.Release();
                 }
 
-                await DelayWithJitter(RequestInterval, ct);
+                // subtract time already spent so we hit the target RPM more accurately
+                var elapsed = sw.Elapsed;
+                var delay = RequestInterval - elapsed;
+                if (delay > TimeSpan.Zero)
+                    await DelayWithJitter(delay, ct);
             }
         }
 
@@ -174,12 +179,11 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
             }
         }
     }
-
-    // ── Replace this with your actual request logic ──────────────────────────
+    
     private async Task SendRandomMainApiRequestAsync(CancellationToken ct)
     {
         // Randomly pick between entity types and operations as needed
-        var endpoints = new[]
+        var postEndpoints = new[]
         {
             "/api/Case/CreateRandom",
             "/api/Car/CreateRandom",
@@ -187,12 +191,26 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
             "/api/Employee/CreateRandom",
         };
 
-        var path = endpoints[Rng.Next(endpoints.Length)];
+        var patchEndpoints = new[]
+        {
+            "/api/Case/UpdateRandom",
+            "/api/Customer/UpdateRandom",
+            "/api/Employee/UpdateRandom",
+            "/api/Car/UpdateRandom",
+        };
 
-        await fixture.CaseClient.PutAsync(path, null, ct);
+        if (Random.Shared.Next(UpdatesPerCreates + 1) == 0)
+        {
+            var path = postEndpoints[Rng.Next(postEndpoints.Length)];
+            await fixture.CaseClient.PutAsync(path, null, ct);
+        }
+        else
+        {
+            var path = patchEndpoints[Rng.Next(postEndpoints.Length)];
+            await fixture.CaseClient.PatchAsync(path, null, ct);
+        }
     }
-
-    // ── Replace with your actual shutdown/restart logic ───────────────────────
+    
     private async Task ShutdownAndRestartSyncApiAsync(CancellationToken ct)
     {
         await fixture.SyncClient.PostAsync("api/Test/SimulateShutdown", null, ct);

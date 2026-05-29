@@ -41,20 +41,20 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
             TableName = tableName,
             ObjectId = obj is T objT ? objT.Id : (Guid)obj
         };
-        await eventDbContext.SyncEvents.AddAsync(@event);
-        
+
+        var events = new List<SyncEvent> { @event };
+
         // cascade changes if update
         if (type == SyncType.Update)
         {
             var cascadingEvents = GetCascadingSyncEvents(typeof(T), returnObject);
-            cascadingEvents = cascadingEvents.DistinctBy(e => new { e.ObjectId, e.TableName });
-            await eventDbContext.SyncEvents.AddRangeAsync(cascadingEvents);
+            events.AddRange(cascadingEvents.DistinctBy(e => new { e.ObjectId, e.TableName }));
         }
+        eventDbContext.SyncEvents.AddRange(events);
         
-        
-        await eventDbContext.SaveChangesAsync();
         await dbContext.SaveChangesAsync();
-        // calls sync endpoint but does not wait for it
+        await eventDbContext.SaveChangesAsync();
+        // calls sync endpoint but does not await it
         CallSyncEndpoint();
         return returnObject;
     }
