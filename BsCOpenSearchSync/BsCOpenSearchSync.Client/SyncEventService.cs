@@ -1,9 +1,9 @@
 using BsCCaseApi.Domain.Interfaces;
-using BsCOpenSearchSync.Business.Helpers;
 using BsCOpenSearchSync.DataAccess.Store;
 using BsCOpenSearchSync.Domain.Enums;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 
 namespace BsCOpenSearchSync.Client;
@@ -113,7 +113,7 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         });
     }
     
-    public IEnumerable<SyncEvent> GetCascadingSyncEvents(Type changedType, object changedEntity)
+    private IEnumerable<SyncEvent> GetCascadingSyncEvents(Type changedType, object changedEntity)
     {
         var changedEntityMeta = dbContext.Model.FindEntityType(changedType);
         if (changedEntityMeta is null) yield break;
@@ -135,7 +135,7 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
             var pkPropertyName = dependentType.FindPrimaryKey()!.Properties[0].Name;
             var tableName = dependentType.GetTableName()!;
 
-            var set = JsonProcessor.GetWithRelationships(dependentType.ClrType, dbContext);
+            var set = GetWithRelationships(dependentType.ClrType, dbContext);
 
             var dependentEntities = set
                 .Cast<object>()
@@ -155,6 +155,56 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
                     Status = SyncStatus.Waiting
                 };
             }
+        }
+    }
+    
+    private static IQueryable GetWithRelationships(Type entityType, DbContext dbContext)
+    {
+        var set = (IQueryable)dbContext.GetType()
+            .GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!
+            .MakeGenericMethod(entityType)
+            .Invoke(dbContext, null)!;
+
+        var entityMeta = dbContext.Model.FindEntityType(entityType)!;
+    
+        foreach (var path in GetNavigationPaths(entityMeta, dbContext.Model))
+        {
+            set = EntityFrameworkQueryableExtensions.Include(
+                (IQueryable<object>)set,
+                path
+            );
+        }
+
+        return set;
+    }
+
+    private static IEnumerable<string> GetNavigationPaths(
+        IEntityType entityType, 
+        IModel model, 
+        string prefix = "", 
+        HashSet<Type>? visited = null)
+    {
+        visited ??= [entityType.ClrType];
+
+        foreach (var navigation in entityType.GetNavigations()
+                     .Where(n => !n.IsCollection)) // skip IEnumerable/ICollection navigations
+        {
+            var path = string.IsNullOrEmpty(prefix) 
+                ? navigation.Name 
+                : $"{prefix}.{navigation.Name}";
+        
+            yield return path;
+
+            var targetType = model.FindEntityType(navigation.TargetEntityType.ClrType);
+            if (targetType is null) continue;
+            if (!visited.Add(targetType.ClrType)) continue;
+        
+            foreach (var nested in GetNavigationPaths(targetType, model, path, visited))
+            {
+                yield return nested;
+            }
+        
+            visited.Remove(targetType.ClrType);
         }
     }
 }

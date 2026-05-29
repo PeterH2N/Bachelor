@@ -26,7 +26,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BsCOpenSearchSync.Business\BsCOpenSearchSync.Business.csproj" />
       <ProjectReference Include="..\BsCOpenSearchSync.DataAccess\BsCOpenSearchSync.DataAccess.csproj" />
       <ProjectReference Include="..\BsCOpenSearchSync.Domain\BsCOpenSearchSync.Domain.csproj" />
     </ItemGroup>
