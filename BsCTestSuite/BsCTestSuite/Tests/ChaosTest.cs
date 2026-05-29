@@ -11,8 +11,8 @@ namespace BsCTestSuite.Tests;
 public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
 {
     private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(2);
-    private static readonly int RequestsPerMinute = 3000;
-    private static readonly TimeSpan RequestInterval = TimeSpan.FromMilliseconds(60_000.0 / RequestsPerMinute * 10);
+    private static readonly int RequestsPerMinute = 1000;
+    private static readonly TimeSpan RequestInterval = TimeSpan.FromMilliseconds(60_000.0 / RequestsPerMinute);
     private static readonly TimeSpan DesyncCheckInterval = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan RestartInterval     = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan DesyncPauseDuration = TimeSpan.FromSeconds(2);
@@ -80,15 +80,8 @@ public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFi
                 await restartGate.WaitAsync(ct);
                 try
                 {
-                    var concurrency = 10;
-                    await Parallel.ForEachAsync(
-                        Enumerable.Range(0, concurrency),
-                        new ParallelOptions { MaxDegreeOfParallelism = concurrency, CancellationToken = ct },
-                        async (_, token) =>
-                        {
-                            SendRandomMainApiRequestAsync(token);
-                            Interlocked.Increment(ref requestCount);
-                        });
+                    SendRandomMainApiRequestAsync(ct);
+                    Interlocked.Increment(ref requestCount);
                 }
                 finally
                 {

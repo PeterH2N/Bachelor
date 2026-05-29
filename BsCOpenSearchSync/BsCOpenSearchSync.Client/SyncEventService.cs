@@ -1,3 +1,4 @@
+using System.Transactions;
 using BsCCaseApi.Domain.Interfaces;
 using BsCOpenSearchSync.DataAccess.Store;
 using BsCOpenSearchSync.Domain.Enums;
@@ -53,23 +54,16 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         }
         eventDbContext.SyncEvents.AddRange(events);
 
-        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+        using var scope = new TransactionScope(
+            TransactionScopeOption.Required,
+            new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted },
+            TransactionScopeAsyncFlowOption.Enabled);
 
-        var connection = dbContext.Database.GetDbConnection();
-        eventDbContext.Database.SetDbConnection(connection);
-        await eventDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+        
+        await dbContext.SaveChangesAsync();
+        await eventDbContext.SaveChangesAsync();
 
-        try
-        {
-            await dbContext.SaveChangesAsync();
-            await eventDbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+        scope.Complete();
         // calls sync endpoint but does not await it
         CallSyncEndpoint();
         return returnObject;
