@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="bscopensearchsync.client" Version="1.2.35" />
+        <PackageReference Include="bscopensearchsync.client" Version="1.2.36" />
         <PackageReference Include="DotNetEnv" Version="3.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
