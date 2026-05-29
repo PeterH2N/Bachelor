@@ -51,9 +51,19 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
             events.AddRange(cascadingEvents.DistinctBy(e => new { e.ObjectId, e.TableName }));
         }
         eventDbContext.SyncEvents.AddRange(events);
-        
-        await dbContext.SaveChangesAsync();
-        await eventDbContext.SaveChangesAsync();
+
+        try
+        {
+            await dbContext.SaveChangesAsync();
+            await eventDbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException e)
+        {
+            // if and exception occurs while updating database, remove the entity, to ensure events are not missed.
+            dbContext.Remove(returnObject);
+            await dbContext.SaveChangesAsync();
+            throw;
+        }
         // calls sync endpoint but does not await it
         CallSyncEndpoint();
         return returnObject;
