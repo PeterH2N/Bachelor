@@ -7,11 +7,14 @@ using BsCOpenSearchSync.Client;
 using BsCOpenSearchSync.DataAccess.Store;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load("../../.env");
+
+string connectionString = Environment.GetEnvironmentVariable("DB_URL") ?? string.Empty;
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -20,8 +23,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-builder.Services.AddDbContext<AppDbContext>();
-builder.Services.AddDbContext<EventDbContext>();
+builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
+{
+    optionsBuilder.UseSqlServer(
+            connectionString
+        )
+        .ConfigureWarnings(w => w.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
+});
+builder.Services.AddDbContext<EventDbContext>((provider, options) =>
+{
+    var appDb = provider.GetRequiredService<AppDbContext>();
+    var connection = appDb.Database.GetDbConnection();
+    options.UseSqlServer(connection);
+});
 
 // Services
 builder.Services.AddScoped<ICaseService, CaseService>();

@@ -11,15 +11,6 @@ public class AppDbContext : DbContext
     public DbSet<Car> Cars { get; set; }
     public DbSet<Employee> Employees { get; set; }
     
-    private readonly string _connectionString = Environment.GetEnvironmentVariable("DB_URL") ?? string.Empty;
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(
-                _connectionString
-            )
-            .ConfigureWarnings(w => w.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
