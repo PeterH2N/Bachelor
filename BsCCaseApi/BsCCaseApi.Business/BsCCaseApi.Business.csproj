@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="bscopensearchsync.client" Version="1.2.34" />
+      <PackageReference Include="bscopensearchsync.client" Version="1.2.35" />
     </ItemGroup>
 
 </Project>
