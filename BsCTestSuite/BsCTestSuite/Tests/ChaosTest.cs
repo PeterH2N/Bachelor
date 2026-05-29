@@ -11,7 +11,7 @@ namespace BsCTestSuite.Tests;
 public class ChaosTest(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
 {
     private static readonly TimeSpan TestDuration        = TimeSpan.FromMinutes(2);
-    private static readonly int RequestsPerMinute = 1000;
+    private static readonly int RequestsPerMinute = 3000;
     private static readonly TimeSpan RequestInterval = TimeSpan.FromMilliseconds(60_000.0 / RequestsPerMinute * 10);
     private static readonly TimeSpan DesyncCheckInterval = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan RestartInterval     = TimeSpan.FromMinutes(15);

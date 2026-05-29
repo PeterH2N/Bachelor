@@ -4,6 +4,7 @@ using BsCOpenSearchSync.Domain.Enums;
 using BsCOpenSearchSync.Domain.Models.Events;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace BsCOpenSearchSync.Client;
@@ -52,16 +53,20 @@ public class SyncEventService(EventDbContext eventDbContext, DbContext dbContext
         }
         eventDbContext.SyncEvents.AddRange(events);
 
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+
         try
         {
-            await dbContext.SaveChangesAsync();
+            await eventDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
             await eventDbContext.SaveChangesAsync();
-        }
-        catch (DbUpdateException e)
-        {
-            // if and exception occurs while updating database, remove the entity, to ensure events are not missed.
-            dbContext.Remove(returnObject);
             await dbContext.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
             throw;
         }
         // calls sync endpoint but does not await it
