@@ -9,8 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BsCCaseApi.DataAccess" Version="1.2.39" />
-      <PackageReference Include="BsCCaseapi.Domain" Version="1.2.39" />
+      <PackageReference Include="BsCCaseApi.DataAccess" Version="1.2.40" />
+      <PackageReference Include="BsCCaseapi.Domain" Version="1.2.40" />
       <PackageReference Include="OpenSearch.Net" Version="1.8.0" />
       <PackageReference Include="Quartz.AspNetCore" Version="3.18.1" />
     </ItemGroup>
