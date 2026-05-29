@@ -2,11 +2,12 @@ using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using BsCTestSuite.Infrastructure;
+using Xunit.Abstractions;
 
 namespace BsCTestSuite.Tests;
 
 [Collection("Tests")]
-public class ReliabilityTests(TestFixture fixture) : IClassFixture<TestFixture>
+public class ReliabilityTests(TestFixture fixture, ITestOutputHelper output) : IClassFixture<TestFixture>
 {
     // check count of a certain index, after adding 100 requests, the count should be 100 higher
     [Fact]

@@ -33,7 +33,8 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
                 return;
             }
             // wait for other threads to process the events
-            await WaitForEventsAsync();
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await WaitForEventsAsync(cancellationToken: timeoutCts.Token);
         
             // Atomically claim the events
             await eventDbContext.SyncEvents
@@ -81,22 +82,20 @@ public class SyncService(EventDbContext eventDbContext, DbContext dbContext, IOp
         CancellationToken cancellationToken = default)
     {
         var interval = pollInterval ?? TimeSpan.FromSeconds(0.5);
-        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
 
         while (true)
         {
             var hasProcessing = await eventDbContext.Set<SyncEvent>()
-                .AnyAsync(e => e.Status == SyncStatus.Syncing, timeoutCts.Token);
+                .AnyAsync(e => e.Status == SyncStatus.Syncing, cancellationToken);
 
             if (!hasProcessing)
                 return;
 
             try
             {
-                await Task.Delay(interval, timeoutCts.Token);
+                await Task.Delay(interval, cancellationToken);
             }
-            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException)
             {
                 return; // timed out, return gracefully
             }
